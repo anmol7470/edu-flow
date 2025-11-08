@@ -2,24 +2,10 @@
 
 import { Logo } from '@/components/logo'
 import { Input } from '@/components/ui/input'
+import { availableNodeTypes, nodeConfig } from '@/lib/nodes'
 import { cn } from '@/lib/utils'
 import { useNodes } from '@xyflow/react'
-import {
-  Calendar,
-  CreditCard,
-  FileEdit,
-  FileText,
-  GitCompare,
-  Globe,
-  HelpCircle,
-  Home,
-  Lightbulb,
-  Mic,
-  Play,
-  Search as SearchIcon,
-  Sparkles,
-  Youtube,
-} from 'lucide-react'
+import { Home, Search as SearchIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -27,21 +13,11 @@ export function WorkflowSidebar() {
   const nodes = useNodes()
   const [searchQuery, setSearchQuery] = useState('')
 
-  const nodeTypes = [
-    { id: 'start', label: 'Start', Icon: Play },
-    { id: 'youtube', label: 'YouTube Analyzer', Icon: Youtube },
-    { id: 'pdf', label: 'PDF Reader', Icon: FileText },
-    { id: 'summarizer', label: 'Text Summarizer', Icon: Sparkles },
-    { id: 'flashcard', label: 'Flashcard Generator', Icon: CreditCard },
-    { id: 'quiz', label: 'Quiz Builder', Icon: HelpCircle },
-    { id: 'concept-extractor', label: 'Concepts Extractor', Icon: Lightbulb },
-    { id: 'cross-reference', label: 'Cross Referencer', Icon: GitCompare },
-    { id: 'essay-grader', label: 'Essay Grader', Icon: FileEdit },
-    { id: 'study-plan', label: 'Study Plan Generator', Icon: Calendar },
-    { id: 'web-scraper', label: 'Web Scraper', Icon: Globe },
-    { id: 'audio-transcriber', label: 'Audio Transcriber', Icon: Mic },
-    { id: 'deep-research', label: 'Deep Research', Icon: SearchIcon },
-  ]
+  const nodeTypes = availableNodeTypes.map((node) => ({
+    id: node.id,
+    label: node.label,
+    Icon: nodeConfig[node.id]?.icon || nodeConfig.default.icon,
+  }))
 
   // Check if a start node already exists
   const hasStartNode = nodes.some((node) => node.data?.type === 'start')

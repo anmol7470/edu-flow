@@ -9,27 +9,10 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
+import { availableNodeTypes, nodeConfig } from '@/lib/nodes'
 import { cn } from '@/lib/utils'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
-import {
-  Calendar,
-  CreditCard,
-  FileEdit,
-  FileText,
-  GitCompare,
-  Globe,
-  GraduationCap,
-  HelpCircle,
-  Lightbulb,
-  Mic,
-  Play,
-  RefreshCw,
-  Search as SearchIcon,
-  Sparkles,
-  Trash2,
-  Workflow,
-  Youtube,
-} from 'lucide-react'
+import { RefreshCw, Trash2 } from 'lucide-react'
 import { memo } from 'react'
 
 type NodeData = {
@@ -38,86 +21,6 @@ type NodeData = {
   onDelete?: (id: string) => void
   onReplace?: (id: string, newType: string) => void
 }
-
-const nodeConfig: Record<string, { icon: typeof Workflow; color: string }> = {
-  start: {
-    icon: Play,
-    color: 'text-green-600',
-  },
-  youtube: {
-    icon: Youtube,
-    color: 'text-red-600',
-  },
-  pdf: {
-    icon: FileText,
-    color: 'text-blue-600',
-  },
-  summarizer: {
-    icon: Sparkles,
-    color: 'text-purple-600',
-  },
-  flashcard: {
-    icon: CreditCard,
-    color: 'text-emerald-600',
-  },
-  quiz: {
-    icon: HelpCircle,
-    color: 'text-orange-600',
-  },
-  tutor: {
-    icon: GraduationCap,
-    color: 'text-indigo-600',
-  },
-  'concept-extractor': {
-    icon: Lightbulb,
-    color: 'text-yellow-600',
-  },
-  'cross-reference': {
-    icon: GitCompare,
-    color: 'text-cyan-600',
-  },
-  'essay-grader': {
-    icon: FileEdit,
-    color: 'text-rose-600',
-  },
-  'study-plan': {
-    icon: Calendar,
-    color: 'text-violet-600',
-  },
-  'web-scraper': {
-    icon: Globe,
-    color: 'text-teal-600',
-  },
-  'audio-transcriber': {
-    icon: Mic,
-    color: 'text-pink-600',
-  },
-  'deep-research': {
-    icon: SearchIcon,
-    color: 'text-amber-600',
-  },
-  default: {
-    icon: Workflow,
-    color: 'text-slate-600',
-  },
-}
-
-const availableNodeTypes = [
-  { id: 'start', label: 'Start' },
-  { id: 'youtube', label: 'YouTube Analyzer' },
-  { id: 'pdf', label: 'PDF Reader' },
-  { id: 'summarizer', label: 'Summarizer' },
-  { id: 'flashcard', label: 'Flashcard Generator' },
-  { id: 'quiz', label: 'Quiz Builder' },
-  { id: 'tutor', label: 'AI Tutor' },
-  { id: 'concept-extractor', label: 'Concept Extractor' },
-  { id: 'cross-reference', label: 'Cross Referencer' },
-  { id: 'essay-grader', label: 'Essay Grader' },
-  { id: 'study-plan', label: 'Study Plan Generator' },
-  { id: 'web-scraper', label: 'Web Scraper' },
-  { id: 'audio-transcriber', label: 'Audio Transcriber' },
-  { id: 'deep-research', label: 'Deep Research' },
-]
 
 export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as NodeData

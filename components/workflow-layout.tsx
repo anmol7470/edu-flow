@@ -33,7 +33,7 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Play className="h-12 w-12 animate-spin text-primary" />
+          <Play className="text-primary h-12 w-12 animate-spin" />
           <div className="text-muted-foreground text-lg">Loading workflow...</div>
         </div>
       </div>
@@ -53,7 +53,7 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
 
         <div className="flex flex-1 flex-col">
           {/* Title editor header */}
-          <div className="border-border flex items-center justify-between border-b px-6 py-4">
+          <div className="border-border flex items-center justify-between border-b px-6 py-3">
             <WorkflowTitleEditor workflowId={workflowId} />
             <Button
               className="gap-2 bg-green-600 text-white hover:bg-green-700"

@@ -2,6 +2,7 @@
 
 import { WorkflowNode } from '@/components/workflow-node'
 import { api } from '@/convex/_generated/api'
+import { nodeTypeLabels } from '@/lib/nodes'
 import type { WorkflowCanvasProps } from '@/lib/types'
 import {
   Background,
@@ -20,23 +21,6 @@ import { useMutation } from 'convex/react'
 import debounce from 'lodash.debounce'
 import { nanoid } from 'nanoid'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-
-const nodeTypeLabels: Record<string, string> = {
-  start: 'Start',
-  youtube: 'YouTube Analyzer',
-  pdf: 'PDF Reader',
-  summarizer: 'Text Summarizer',
-  flashcard: 'Flashcard Generator',
-  quiz: 'Quiz Builder',
-  tutor: 'AI Tutor',
-  'concept-extractor': 'Concepts Extractor',
-  'cross-reference': 'Cross Referencer',
-  'essay-grader': 'Essay Grader',
-  'study-plan': 'Study Plan Generator',
-  'web-scraper': 'Web Scraper',
-  'audio-transcriber': 'Audio Transcriber',
-  'deep-research': 'Deep Research',
-}
 
 function FlowCanvas({
   workflowId,

@@ -58,8 +58,8 @@ export function WorkflowTitleEditor({ workflowId }: WorkflowTitleEditorProps) {
   if (!workflow) {
     return (
       <div className="flex items-center gap-2">
-        <Pencil className="h-5 w-5 animate-spin text-muted-foreground" />
-        <div className="h-8 w-48 animate-pulse rounded bg-muted" />
+        <Pencil className="text-muted-foreground h-5 w-5 animate-spin" />
+        <div className="bg-muted h-8 w-48 animate-pulse rounded" />
       </div>
     )
   }
@@ -80,7 +80,7 @@ export function WorkflowTitleEditor({ workflowId }: WorkflowTitleEditorProps) {
           <Check className="h-4 w-4 text-green-600" />
         </Button>
         <Button size="sm" variant="ghost" onClick={handleCancel} disabled={isSaving}>
-          <X className="h-4 w-4 text-destructive" />
+          <X className="text-destructive h-4 w-4" />
         </Button>
       </div>
     )
@@ -95,4 +95,3 @@ export function WorkflowTitleEditor({ workflowId }: WorkflowTitleEditorProps) {
     </div>
   )
 }
-
