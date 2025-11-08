@@ -15,5 +15,5 @@ export default async function WorkflowPage({
     redirect("/");
   }
 
-  return <WorkflowLayout workflowId={id} />;
+  return <WorkflowLayout workflowId={id} userId={user.id} />;
 }

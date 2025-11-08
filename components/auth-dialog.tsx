@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import type { AuthDialogProps } from "@/lib/types";
 
 const authSchema = z.object({
   name: z.string().optional(),
@@ -32,11 +33,6 @@ const authSchema = z.object({
 });
 
 type AuthFormValues = z.infer<typeof authSchema>;
-
-interface AuthDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
 
 export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   const [isLogin, setIsLogin] = useState(true);

@@ -15,4 +15,5 @@ alwaysApply: true
 - Write db mutations and queries in app/api as api routes.
 - Use useEffects only if you absolutely need to. Don't implement otherwise.
 - Calling setState synchronously within an effect can trigger cascading renders. Dont call setState in useEffects.
-- use z.email() instead of z.string().email()
+- Use z.email() instead of z.string().email()
+- Always prefer using type instead of interface
