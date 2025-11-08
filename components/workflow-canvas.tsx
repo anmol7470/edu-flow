@@ -5,7 +5,6 @@ import {
   ReactFlow,
   Background,
   Controls,
-  MiniMap,
   addEdge,
   useNodesState,
   useEdgesState,
@@ -20,8 +19,9 @@ import debounce from "lodash.debounce";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { WorkflowNode } from "@/components/workflow-node";
+import { Button } from "@/components/ui/button";
+import { Play } from "lucide-react";
 import type { WorkflowCanvasProps } from "@/lib/types";
-import "@xyflow/react/dist/style.css";
 
 const nodeTypeLabels: Record<string, string> = {
   youtube: "YouTube Analyzer",
@@ -110,7 +110,21 @@ function FlowCanvas({
   );
 
   return (
-    <div ref={reactFlowWrapper} className="w-full h-full">
+    <div ref={reactFlowWrapper} className="w-full h-full relative">
+      {/* Start button in top right */}
+      <div className="absolute top-4 right-4 z-10">
+        <Button
+          className="gap-2 bg-green-600 hover:bg-green-700 text-white shadow-lg"
+          onClick={() => {
+            // TODO: Implement workflow execution
+            console.log("Start workflow");
+          }}
+        >
+          <Play className="w-4 h-4" />
+          Start
+        </Button>
+      </div>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -121,10 +135,15 @@ function FlowCanvas({
         onDragOver={onDragOver}
         nodeTypes={nodeTypes}
         fitView
+        fitViewOptions={{
+          padding: 0.3,
+          maxZoom: 0.9,
+          minZoom: 0.5,
+        }}
+        proOptions={{ hideAttribution: true }}
       >
         <Background />
         <Controls />
-        <MiniMap />
       </ReactFlow>
     </div>
   );
