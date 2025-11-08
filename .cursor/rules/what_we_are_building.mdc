@@ -1,0 +1,202 @@
+---
+alwaysApply: true
+---
+
+Bro this idea is **🔥 and super demo-friendly**. An AI “education workflow builder” with React Flow + multi-agents is insanely visual, chat-driven, and judges LOVE projects where they can _see_ the intelligence happening.
+
+Let’s go **full hackathon mode**:
+
+---
+
+# ✅ What your platform actually is (in judge-friendly language)
+
+You’re building a **canvas-based AI automation system for learning**:
+
+- Each node = an AI agent with a different skill (YouTube lecture analyzer, PDF reader, essay grader, quiz generator, flashcard builder, report writer, translator, etc.)
+- Edges connect outputs → inputs (like Zapier or LangGraph for learning)
+- You can **chat with each node** to tweak its output and rerun that part of the pipeline
+- Runs multi-step autonomous flows like: “Extract concepts from a lecture → summarize → generate flashcards → test me with adaptive quizzes”
+
+This screams **Education & Entertainment Track** and also **Best Overall + Practical AI Innovation**.
+
+And since you can integrate documents, agents, streaming, and analysis, you can enter multiple special tracks.
+
+---
+
+# ✅ Complex workflows that will impress judges
+
+Aim for changes-in-real-time, visible outputs, and reasoning that _feels_ autonomous.
+
+### ✅ **1. YouTube → Notes → Flashcards → Quiz → Study Plan**
+
+**Flow:**
+
+1. Drop a YouTube URL node
+2. It transcribes + extracts concepts
+3. Summarizer cleans it into structured lecture notes
+4. Flashcard generator creates spaced repetition cards
+5. Quiz builder makes 10 MCQs based on weak areas
+6. Study plan agent recommends what to learn next
+
+**Demo moment:**
+You switch a setting in one node (“make flashcards harder”), only that part of the pipeline reruns and updates.
+
+**Tracks:**
+
+- **Education & Entertainment** (obviously)
+- **Best Practical AI Innovation by Amazon**
+- **Best Overall**
+- **Best Predictive Intelligence** (if you predict weak concepts)
+
+---
+
+### ✅ **2. PDF Textbook → Personalized Tutor → Essay Grader**
+
+**Flow:**
+
+- Upload a chapter → summary node → Q&A tutor node
+- Student writes a short-answer response → Essay Grader node evaluates it
+- Gives feedback, rewrites, and provides improvement tips
+- Data flows into a progress report node
+
+**Sexy demo moment:**
+You ask the tutor a tricky question and it cites exact pages from the PDF.
+Then rewrite your answer to bump your “score”.
+
+**Tracks:**
+
+- Education & Entertainment
+- Amazon Practical AI Innovation
+- YC Challenge (ed-tech startup vibes)
+- Photon Hybrid Intelligence (autonomous tutoring systems)
+
+---
+
+### ✅ **3. Lecture Video + Research Paper → Auto-Generated Study Report**
+
+For STEM/CS students:
+
+Flow:
+
+1. YouTube lecture node pulls transcript → semantic chunker
+2. PDF (research paper) node extracts important claims
+3. Compare + cross-reference node finds contradictions or alignment
+4. Writer node generates a:
+   ✅ 1-page summary
+   ✅ Table of concepts
+   ✅ Example problems
+   ✅ Quiz
+
+This looks **unreasonably powerful** to judges.
+
+**Tracks:**
+
+- Best Overall
+- Best Education & Entertainment
+- Best Practical AI Innovation
+- Best Use of Gemini / Grok / Open Source
+
+---
+
+### ✅ **4. “Turn my messy lecture notes into a clean study system”**
+
+Live demo a chaotic scratchpad (typos, random thoughts).
+
+1. OCR/Notes Cleaner node standardizes
+2. Summarizer compresses
+3. Flashcard engine makes Anki-style cards
+4. Quiz generator + spaced repetition scheduler
+5. Motivation agent sends personal reminders
+
+Judges LOVE seeing chaos → organization.
+
+---
+
+### ✅ **5. “Skill Chain”**
+
+Teach me **Python Machine Learning** in a chain:
+
+- YouTube primer
+- PDF of official docs
+- Tutor generates learning modules
+- Code evaluator runs examples & fixes errors
+- Quiz + final project generator
+
+That's basically a **self-updating, AI-driven curriculum**.
+
+**Tracks to enter:**
+
+- Education & Entertainment (your main)
+- Best Practical AI Innovation
+- YC (this is literally “AI-native bootcamp”)
+- Photon (autonomous learning)
+
+---
+
+# ✅ Special Tracks You Can Enter (and how to justify)
+
+| Track                                           | Why You Fit                                                                 |
+| ----------------------------------------------- | --------------------------------------------------------------------------- |
+| **Best Education & Entertainment**              | This is THE category for your idea ✅                                       |
+| **Best Practical AI Innovation by Amazon**      | It literally improves studying + workflow automation ✅                     |
+| **YC Challenge**                                | It’s an AI-native edtech company, replace Khan Academy or Quizlet           |
+| **Best Predictive Intelligence**                | Predict weak areas and dynamically adjust quizzes                           |
+| **Photon Hybrid Intelligence**                  | Multi-agent autonomous learning workflows                                   |
+| **Best Use of Gemini / Open Source**            | Use Gemini or OpenAI for summarization, reasoning, and tutoring             |
+| **Most Impactful Use of X API / Knot / Solana** | If you integrate payments or credential verification for courses (optional) |
+
+Since HackPrinceton requires 1 main track, for you:
+✅ **Enter: Best Entertainment & Education Hack**
+Then stack special tracks: Amazon Practical AI + YC + Photon + Open Source.
+
+(This gives you max shots at prizes without extra work.)
+
+**Source:** HackPrinceton Fall 2025 Hacker Packet
+
+---
+
+# ✅ How to show off in a 2-minute demo (critical)
+
+Judges love:
+✅ Visuals (drag nodes, connect flows)
+✅ Real data (PDFs, transcripts, messy notes)
+✅ Autonomy (“Rebuild just this node”, “Fix flashcards”, etc.)
+✅ Personalization (student level, difficulty)
+
+Example script:
+
+> “Here’s a lecture on neural networks. Watch what happens:
+> I connect YouTube → Summarizer → Flashcards → Quiz.
+> The system transcribes the video, extracts concepts, generates flashcards, builds a quiz, and then evaluates my answers.
+> And I can chat with just the flashcard node to make them harder without rerunning the entire pipeline.”
+
+Guaranteed “whoa” moment.
+
+---
+
+## ✅ TL;DR
+
+Your AI education workflow builder can create:
+✅ Lecture → notes → flashcards → quiz
+✅ Textbook → tutor → essay grader
+✅ Research paper + video → study report
+✅ Messy notes → clean study system
+✅ Skill trees & adaptive learning plans
+
+Perfect for:
+✅ **Best Education & Entertainment** (main track)
+✅ **Best Practical AI Innovation by Amazon**
+✅ **YC Challenge**
+✅ **Best Overall**
+✅ **Photon Hybrid Intelligence**
+✅ **Best Use of Gemini / Open Source**
+
+---
+
+If you want, I can help you:
+✅ name the project,
+✅ spec the architecture (React Flow + backend + agents),
+✅ preload 3 demo datasets,
+✅ and write your pitch script so it hits in 90 seconds.
+
+Want to build the demo plan + architecture next?
