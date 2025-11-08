@@ -36,7 +36,14 @@ function FlowCanvas({
 
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
-      setNodes((nds) => nds.filter((node) => node.id !== nodeId))
+      setNodes((nds) => {
+        const nodeToDelete = nds.find((node) => node.id === nodeId)
+        // Prevent deletion of start nodes
+        if (nodeToDelete?.data?.type === 'start') {
+          return nds
+        }
+        return nds.filter((node) => node.id !== nodeId)
+      })
       setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId))
     },
     [setNodes, setEdges]
@@ -47,6 +54,10 @@ function FlowCanvas({
       setNodes((nds) =>
         nds.map((node) => {
           if (node.id === nodeId) {
+            // Prevent replacement of start nodes
+            if (node.data?.type === 'start') {
+              return node
+            }
             return {
               ...node,
               data: {
@@ -89,6 +100,7 @@ function FlowCanvas({
     setNodes((nds) =>
       nds.map((node) => ({
         ...node,
+        deletable: node.data?.type !== 'start',
         data: {
           ...node.data,
           onDelete: handleDeleteNode,
@@ -131,6 +143,7 @@ function FlowCanvas({
         id: nanoid(),
         type: 'workflow',
         position,
+        deletable: nodeType !== 'start',
         data: {
           label: nodeTypeLabels[nodeType] || nodeType,
           type: nodeType,

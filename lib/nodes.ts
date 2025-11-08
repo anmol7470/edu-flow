@@ -11,6 +11,7 @@ import {
   Play,
   Search as SearchIcon,
   Sparkles,
+  Wand2,
   Workflow,
   Youtube,
   type LucideIcon,
@@ -26,6 +27,7 @@ export const nodeTypeLabels: Record<string, string> = {
   youtube: 'YouTube Analyzer',
   pdf: 'PDF Reader',
   summarizer: 'Text Summarizer',
+  'text-improver': 'Text Improver',
   flashcard: 'Flashcard Generator',
   quiz: 'Quiz Builder',
   tutor: 'AI Tutor',
@@ -53,6 +55,10 @@ export const nodeConfig: Record<string, NodeType> = {
   summarizer: {
     icon: Sparkles,
     color: 'text-purple-600',
+  },
+  'text-improver': {
+    icon: Wand2,
+    color: 'text-cyan-600',
   },
   flashcard: {
     icon: CreditCard,
@@ -100,7 +106,8 @@ export const availableNodeTypes = [
   { id: 'start', label: 'Start' },
   { id: 'youtube', label: 'YouTube Analyzer' },
   { id: 'pdf', label: 'PDF Reader' },
-  { id: 'summarizer', label: 'Summarizer' },
+  { id: 'summarizer', label: 'Text Summarizer' },
+  { id: 'text-improver', label: 'Text Improver' },
   { id: 'flashcard', label: 'Flashcard Generator' },
   { id: 'quiz', label: 'Quiz Builder' },
   { id: 'tutor', label: 'AI Tutor' },

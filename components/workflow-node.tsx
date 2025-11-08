@@ -28,15 +28,16 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
   const type = nodeData?.type || 'default'
   const config = nodeConfig[type] || nodeConfig.default
   const Icon = config.icon
+  const isStartNode = type === 'start'
 
   const handleDelete = () => {
-    if (nodeData?.onDelete) {
+    if (nodeData?.onDelete && !isStartNode) {
       nodeData.onDelete(id)
     }
   }
 
   const handleReplace = (newType: string) => {
-    if (nodeData?.onReplace) {
+    if (nodeData?.onReplace && !isStartNode) {
       nodeData.onReplace(id, newType)
     }
   }
@@ -136,32 +137,39 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-48">
-        <ContextMenuSub>
-          <ContextMenuSubTrigger>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Replace with
-          </ContextMenuSubTrigger>
-          <ContextMenuSubContent>
-            {availableNodeTypes.map((nodeType) => {
-              const nodeTypeConfig = nodeConfig[nodeType.id] || nodeConfig.default
-              const NodeIcon = nodeTypeConfig.icon
-              return (
-                <ContextMenuItem
-                  key={nodeType.id}
-                  onClick={() => handleReplace(nodeType.id)}
-                  disabled={type === nodeType.id}
-                >
-                  <NodeIcon className="h-4 w-4" />
-                  {nodeType.label}
-                </ContextMenuItem>
-              )
-            })}
-          </ContextMenuSubContent>
-        </ContextMenuSub>
-        <ContextMenuItem variant="destructive" onClick={handleDelete}>
-          <Trash2 className="h-4 w-4" />
-          Delete Node
-        </ContextMenuItem>
+        {!isStartNode && (
+          <>
+            <ContextMenuSub>
+              <ContextMenuSubTrigger>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Replace with
+              </ContextMenuSubTrigger>
+              <ContextMenuSubContent>
+                {availableNodeTypes.map((nodeType) => {
+                  const nodeTypeConfig = nodeConfig[nodeType.id] || nodeConfig.default
+                  const NodeIcon = nodeTypeConfig.icon
+                  return (
+                    <ContextMenuItem
+                      key={nodeType.id}
+                      onClick={() => handleReplace(nodeType.id)}
+                      disabled={type === nodeType.id}
+                    >
+                      <NodeIcon className="h-4 w-4" />
+                      {nodeType.label}
+                    </ContextMenuItem>
+                  )
+                })}
+              </ContextMenuSubContent>
+            </ContextMenuSub>
+            <ContextMenuItem variant="destructive" onClick={handleDelete}>
+              <Trash2 className="h-4 w-4" />
+              Delete Node
+            </ContextMenuItem>
+          </>
+        )}
+        {isStartNode && (
+          <div className="text-muted-foreground px-2 py-6 text-center text-sm">Start node cannot be modified</div>
+        )}
       </ContextMenuContent>
     </ContextMenu>
   )
