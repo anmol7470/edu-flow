@@ -1,36 +1,37 @@
-"use client";
+'use client'
 
-import { useCallback, useRef, useMemo, useEffect } from "react";
+import { Button } from '@/components/ui/button'
+import { WorkflowNode } from '@/components/workflow-node'
+import { api } from '@/convex/_generated/api'
+import type { WorkflowCanvasProps } from '@/lib/types'
 import {
-  ReactFlow,
   Background,
   Controls,
+  ReactFlow,
   addEdge,
-  useNodesState,
   useEdgesState,
+  useNodesState,
   useReactFlow,
-  type OnConnect,
-  type Node,
   type Edge,
+  type Node,
   type NodeTypes,
-} from "@xyflow/react";
-import { nanoid } from "nanoid";
-import debounce from "lodash.debounce";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { WorkflowNode } from "@/components/workflow-node";
-import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
-import type { WorkflowCanvasProps } from "@/lib/types";
+  type OnConnect,
+} from '@xyflow/react'
+import { useMutation } from 'convex/react'
+import debounce from 'lodash.debounce'
+import { Play } from 'lucide-react'
+import { nanoid } from 'nanoid'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 const nodeTypeLabels: Record<string, string> = {
-  youtube: "YouTube Analyzer",
-  pdf: "PDF Reader",
-  summarizer: "Summarizer",
-  flashcard: "Flashcard Generator",
-  quiz: "Quiz Builder",
-  tutor: "AI Tutor",
-};
+  start: 'Start',
+  youtube: 'YouTube Analyzer',
+  pdf: 'PDF Reader',
+  summarizer: 'Summarizer',
+  flashcard: 'Flashcard Generator',
+  quiz: 'Quiz Builder',
+  tutor: 'AI Tutor',
+}
 
 function FlowCanvas({
   workflowId,
@@ -38,18 +39,47 @@ function FlowCanvas({
   initialNodes: providedInitialNodes,
   initialEdges: providedInitialEdges,
 }: WorkflowCanvasProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState(providedInitialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(providedInitialEdges);
-  const { screenToFlowPosition } = useReactFlow();
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const saveWorkflow = useMutation(api.workflows.saveWorkflow);
+  const [nodes, setNodes, onNodesChange] = useNodesState(providedInitialNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(providedInitialEdges)
+  const { screenToFlowPosition } = useReactFlow()
+  const reactFlowWrapper = useRef<HTMLDivElement>(null)
+  const saveWorkflow = useMutation(api.workflows.saveWorkflow)
+
+  const handleDeleteNode = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) => nds.filter((node) => node.id !== nodeId))
+      setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId))
+    },
+    [setNodes, setEdges]
+  )
+
+  const handleReplaceNode = useCallback(
+    (nodeId: string, newType: string) => {
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id === nodeId) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                type: newType,
+                label: nodeTypeLabels[newType] || newType,
+              },
+            }
+          }
+          return node
+        })
+      )
+    },
+    [setNodes]
+  )
 
   const nodeTypes: NodeTypes = useMemo(
     () => ({
       workflow: WorkflowNode,
     }),
     []
-  );
+  )
 
   // Debounced save function
   const debouncedSave = useMemo(
@@ -60,67 +90,83 @@ function FlowCanvas({
           userId,
           nodes: JSON.stringify(nodes),
           edges: JSON.stringify(edges),
-        });
+        })
       }, 300),
     [workflowId, userId, saveWorkflow]
-  );
+  )
+
+  // Add delete and replace handlers to all nodes
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          onDelete: handleDeleteNode,
+          onReplace: handleReplaceNode,
+        },
+      }))
+    )
+  }, [handleDeleteNode, handleReplaceNode, setNodes])
 
   // Save workflow whenever nodes or edges change
   useEffect(() => {
     if (nodes.length > 0 || edges.length > 0) {
-      debouncedSave(nodes, edges);
+      debouncedSave(nodes, edges)
     }
-  }, [nodes, edges, debouncedSave]);
+  }, [nodes, edges, debouncedSave])
 
-  const onConnect: OnConnect = useCallback(
-    (connection) => setEdges((eds) => addEdge(connection, eds)),
-    [setEdges]
-  );
+  const onConnect: OnConnect = useCallback((connection) => setEdges((eds) => addEdge(connection, eds)), [setEdges])
 
   const onDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-  }, []);
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+  }, [])
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
-      event.preventDefault();
+      event.preventDefault()
 
-      const nodeType = event.dataTransfer.getData("application/reactflow");
+      const nodeType = event.dataTransfer.getData('application/reactflow')
 
       if (!nodeType) {
-        return;
+        return
       }
 
       const position = screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
-      });
+      })
 
       const newNode: Node = {
         id: nanoid(),
-        type: "workflow",
+        type: 'workflow',
         position,
-        data: { label: nodeTypeLabels[nodeType] || nodeType },
-      };
+        data: {
+          label: nodeTypeLabels[nodeType] || nodeType,
+          type: nodeType,
+          onDelete: handleDeleteNode,
+          onReplace: handleReplaceNode,
+        },
+      }
 
-      setNodes((nds) => nds.concat(newNode));
+      setNodes((nds) => nds.concat(newNode))
     },
-    [screenToFlowPosition, setNodes]
-  );
+    [screenToFlowPosition, setNodes, handleDeleteNode, handleReplaceNode]
+  )
 
   return (
-    <div ref={reactFlowWrapper} className="w-full h-full relative">
+    <div ref={reactFlowWrapper} className="relative h-full w-full">
       {/* Start button in top right */}
       <div className="absolute top-4 right-4 z-10">
         <Button
-          className="gap-2 bg-green-600 hover:bg-green-700 text-white shadow-lg"
+          className="gap-2 bg-green-600 text-white shadow-lg hover:bg-green-700"
           onClick={() => {
             // TODO: Implement workflow execution
-            console.log("Start workflow");
+            console.log('Start workflow')
           }}
         >
-          <Play className="w-4 h-4" />
+          <Play className="h-4 w-4" />
           Start
         </Button>
       </div>
@@ -146,9 +192,9 @@ function FlowCanvas({
         <Controls />
       </ReactFlow>
     </div>
-  );
+  )
 }
 
 export function WorkflowCanvas(props: WorkflowCanvasProps) {
-  return <FlowCanvas {...props} />;
+  return <FlowCanvas {...props} />
 }

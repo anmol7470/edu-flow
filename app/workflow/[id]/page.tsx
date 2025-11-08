@@ -1,19 +1,15 @@
-import { WorkflowLayout } from "@/components/workflow-layout";
-import { getUser } from "@/lib/get-user";
-import { redirect } from "next/navigation";
+import { WorkflowLayout } from '@/components/workflow-layout'
+import { getUser } from '@/lib/get-user'
+import { redirect } from 'next/navigation'
 
-export default async function WorkflowPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+export default async function WorkflowPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
 
-  const user = await getUser();
+  const user = await getUser()
 
   if (!user) {
-    redirect("/");
+    redirect('/')
   }
 
-  return <WorkflowLayout workflowId={id} userId={user.id} />;
+  return <WorkflowLayout workflowId={id} userId={user.id} />
 }

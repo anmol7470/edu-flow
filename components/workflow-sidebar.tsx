@@ -1,52 +1,114 @@
-"use client";
+'use client'
 
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Logo } from '@/components/logo'
+import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
+import { useNodes } from '@xyflow/react'
+import {
+  Calendar,
+  CreditCard,
+  FileEdit,
+  FileText,
+  GitCompare,
+  Globe,
+  HelpCircle,
+  Home,
+  Lightbulb,
+  Mic,
+  Play,
+  Search as SearchIcon,
+  Sparkles,
+  Youtube,
+} from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
 
 export function WorkflowSidebar() {
+  const nodes = useNodes()
+  const [searchQuery, setSearchQuery] = useState('')
+
   const nodeTypes = [
-    { id: "youtube", label: "YouTube Analyzer", icon: "🎥" },
-    { id: "pdf", label: "PDF Reader", icon: "📄" },
-    { id: "summarizer", label: "Summarizer", icon: "📝" },
-    { id: "flashcard", label: "Flashcard Generator", icon: "🃏" },
-    { id: "quiz", label: "Quiz Builder", icon: "❓" },
-    { id: "tutor", label: "AI Tutor", icon: "🤖" },
-  ];
+    { id: 'start', label: 'Start', Icon: Play },
+    { id: 'youtube', label: 'YouTube Analyzer', Icon: Youtube },
+    { id: 'pdf', label: 'PDF Reader', Icon: FileText },
+    { id: 'summarizer', label: 'Text Summarizer', Icon: Sparkles },
+    { id: 'flashcard', label: 'Flashcard Generator', Icon: CreditCard },
+    { id: 'quiz', label: 'Quiz Builder', Icon: HelpCircle },
+    { id: 'concept-extractor', label: 'Concepts Extractor', Icon: Lightbulb },
+    { id: 'cross-reference', label: 'Cross Referencer', Icon: GitCompare },
+    { id: 'essay-grader', label: 'Essay Grader', Icon: FileEdit },
+    { id: 'study-plan', label: 'Study Plan Generator', Icon: Calendar },
+    { id: 'web-scraper', label: 'Web Scraper', Icon: Globe },
+    { id: 'audio-transcriber', label: 'Audio Transcriber', Icon: Mic },
+    { id: 'deep-research', label: 'Deep Research', Icon: SearchIcon },
+  ]
+
+  // Check if a start node already exists
+  const hasStartNode = nodes.some((node) => node.data?.type === 'start')
+
+  // Filter nodes based on search query
+  const filteredNodes = nodeTypes.filter((node) => node.label.toLowerCase().includes(searchQuery.toLowerCase()))
 
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
-    event.dataTransfer.setData("application/reactflow", nodeType);
-    event.dataTransfer.effectAllowed = "move";
-  };
+    event.dataTransfer.setData('application/reactflow', nodeType)
+    event.dataTransfer.effectAllowed = 'move'
+  }
 
   return (
-    <div className="h-full bg-muted/30 border-r border-border p-4 flex flex-col gap-4">
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Workflow Nodes</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Drag nodes to the canvas
-        </p>
+    <div className="bg-muted/30 border-border flex h-full flex-col gap-4 border-r pt-4 pb-4 pl-4">
+      {/* Header with branding and home link */}
+      <div className="flex items-center justify-between pr-4">
+        <div className="flex items-center gap-2">
+          <Logo size="sm" />
+          <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-lg font-semibold text-transparent">
+            EduFlow
+          </span>
+        </div>
+        <Link href="/" className="hover:bg-muted rounded-lg p-2 transition-colors" title="Go to home">
+          <Home className="size-5" />
+        </Link>
       </div>
 
-      <div className="flex-1 flex flex-col gap-2 overflow-y-auto">
-        {nodeTypes.map((node) => (
-          <div
-            key={node.id}
-            draggable
-            onDragStart={(e) => onDragStart(e, node.id)}
-            className="flex items-center gap-3 p-3 bg-background border border-border rounded-lg cursor-move hover:border-primary transition-colors"
-          >
-            <span className="text-2xl">{node.icon}</span>
-            <span className="text-sm font-medium">{node.label}</span>
-          </div>
-        ))}
+      {/* Search input */}
+      <div className="relative pr-4">
+        <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
+        <Input
+          type="text"
+          placeholder="Search nodes..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
-      <div className="pt-4 border-t border-border">
-        <Button variant="outline" className="w-full gap-2">
-          <Plus className="w-4 h-4" />
-          Add Custom Node
-        </Button>
+      {/* Node list */}
+      <div className="flex flex-1 flex-col gap-2 overflow-y-auto pr-4">
+        {filteredNodes.length === 0 ? (
+          <div className="text-muted-foreground py-8 text-center text-sm">No nodes found</div>
+        ) : (
+          filteredNodes.map((node) => {
+            const isDisabled = node.id === 'start' && hasStartNode
+            const NodeIcon = node.Icon
+            return (
+              <div
+                key={node.id}
+                draggable={!isDisabled}
+                onDragStart={(e) => !isDisabled && onDragStart(e, node.id)}
+                className={cn(
+                  'bg-background border-border flex items-center gap-3 rounded-lg border p-3 transition-colors',
+                  isDisabled ? 'cursor-not-allowed opacity-50' : 'hover:border-primary cursor-move hover:shadow-sm'
+                )}
+                title={isDisabled ? 'Start node already exists on canvas' : `Drag ${node.label} to canvas`}
+              >
+                <div className="bg-primary/10 rounded-md p-1.5">
+                  <NodeIcon className="text-primary h-4 w-4" />
+                </div>
+                <span className="text-sm font-medium">{node.label}</span>
+              </div>
+            )
+          })
+        )}
       </div>
     </div>
-  );
+  )
 }

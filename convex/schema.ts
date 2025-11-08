@@ -1,5 +1,5 @@
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
+import { defineSchema, defineTable } from 'convex/server'
+import { v } from 'convex/values'
 
 export default defineSchema({
   workflows: defineTable({
@@ -10,6 +10,6 @@ export default defineSchema({
     updatedAt: v.number(),
     createdAt: v.number(),
   })
-    .index("by_workflow_id", ["workflowId"])
-    .index("by_user", ["userId"]),
-});
+    .index('by_workflow_id', ['workflowId'])
+    .index('by_user', ['userId']),
+})
