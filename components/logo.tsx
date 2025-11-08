@@ -30,11 +30,11 @@ export function Logo({ size = 'lg' }: LogoProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <div className={`bg-gradient-to-br from-blue-500 to-purple-600 ${config.padding} ${config.rounded}`}>
+      <div className={`bg-linear-to-br from-blue-500 to-purple-600 ${config.padding} ${config.rounded}`}>
         <Workflow className={`${config.icon} text-white`} />
       </div>
       {size === 'lg' && (
-        <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
+        <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
           EduFlow
         </span>
       )}

@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { WorkflowNode } from '@/components/workflow-node'
 import { api } from '@/convex/_generated/api'
 import type { WorkflowCanvasProps } from '@/lib/types'
@@ -19,7 +18,6 @@ import {
 } from '@xyflow/react'
 import { useMutation } from 'convex/react'
 import debounce from 'lodash.debounce'
-import { Play } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
@@ -27,10 +25,17 @@ const nodeTypeLabels: Record<string, string> = {
   start: 'Start',
   youtube: 'YouTube Analyzer',
   pdf: 'PDF Reader',
-  summarizer: 'Summarizer',
+  summarizer: 'Text Summarizer',
   flashcard: 'Flashcard Generator',
   quiz: 'Quiz Builder',
   tutor: 'AI Tutor',
+  'concept-extractor': 'Concepts Extractor',
+  'cross-reference': 'Cross Referencer',
+  'essay-grader': 'Essay Grader',
+  'study-plan': 'Study Plan Generator',
+  'web-scraper': 'Web Scraper',
+  'audio-transcriber': 'Audio Transcriber',
+  'deep-research': 'Deep Research',
 }
 
 function FlowCanvas({
@@ -157,20 +162,6 @@ function FlowCanvas({
 
   return (
     <div ref={reactFlowWrapper} className="relative h-full w-full">
-      {/* Start button in top right */}
-      <div className="absolute top-4 right-4 z-10">
-        <Button
-          className="gap-2 bg-green-600 text-white shadow-lg hover:bg-green-700"
-          onClick={() => {
-            // TODO: Implement workflow execution
-            console.log('Start workflow')
-          }}
-        >
-          <Play className="h-4 w-4" />
-          Start
-        </Button>
-      </div>
-
       <ReactFlow
         nodes={nodes}
         edges={edges}

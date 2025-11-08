@@ -5,6 +5,7 @@ export default defineSchema({
   workflows: defineTable({
     workflowId: v.string(),
     userId: v.string(),
+    title: v.string(),
     nodes: v.string(), // JSON stringified nodes array
     edges: v.string(), // JSON stringified edges array
     updatedAt: v.number(),

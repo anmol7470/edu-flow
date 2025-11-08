@@ -6,13 +6,27 @@ export const createWorkflow = mutation({
   args: {
     workflowId: v.string(),
     userId: v.string(),
+    title: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const now = Date.now()
+
+    // Create a default start node
+    const startNode = {
+      id: `start-${now}`,
+      type: 'workflow',
+      position: { x: 250, y: 150 },
+      data: {
+        label: 'Start',
+        type: 'start',
+      },
+    }
+
     const _id = await ctx.db.insert('workflows', {
       workflowId: args.workflowId,
       userId: args.userId,
-      nodes: JSON.stringify([]),
+      title: args.title || 'New Workflow',
+      nodes: JSON.stringify([startNode]),
       edges: JSON.stringify([]),
       createdAt: now,
       updatedAt: now,
@@ -51,6 +65,7 @@ export const saveWorkflow = mutation({
       const _id = await ctx.db.insert('workflows', {
         workflowId: args.workflowId,
         userId: args.userId,
+        title: 'New Workflow',
         nodes: args.nodes,
         edges: args.edges,
         createdAt: now,
@@ -79,6 +94,7 @@ export const getWorkflow = query({
     return {
       workflowId: workflow.workflowId,
       userId: workflow.userId,
+      title: workflow.title || 'New Workflow',
       nodes: workflow.nodes,
       edges: workflow.edges,
       updatedAt: workflow.updatedAt,
@@ -100,8 +116,55 @@ export const getUserWorkflows = query({
 
     return workflows.map((w) => ({
       workflowId: w.workflowId,
+      title: w.title || 'New Workflow',
       updatedAt: w.updatedAt,
       createdAt: w.createdAt,
     }))
+  },
+})
+
+// Update workflow title
+export const updateWorkflowTitle = mutation({
+  args: {
+    workflowId: v.string(),
+    title: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const workflow = await ctx.db
+      .query('workflows')
+      .withIndex('by_workflow_id', (q) => q.eq('workflowId', args.workflowId))
+      .first()
+
+    if (!workflow) {
+      throw new ConvexError('Workflow not found')
+    }
+
+    await ctx.db.patch(workflow._id, {
+      title: args.title,
+      updatedAt: Date.now(),
+    })
+
+    return { success: true }
+  },
+})
+
+// Delete workflow
+export const deleteWorkflow = mutation({
+  args: {
+    workflowId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const workflow = await ctx.db
+      .query('workflows')
+      .withIndex('by_workflow_id', (q) => q.eq('workflowId', args.workflowId))
+      .first()
+
+    if (!workflow) {
+      throw new ConvexError('Workflow not found')
+    }
+
+    await ctx.db.delete(workflow._id)
+
+    return { success: true }
   },
 })
