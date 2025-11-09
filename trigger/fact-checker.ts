@@ -104,6 +104,12 @@ ${text ? `Text to analyze:\n\n${text}\n\n` : ''}Now provide a structured list of
         claims = [{ topic: 'General', claim: fallbackText.slice(0, 500) }]
       }
 
+      // Limit to 10 claims max to avoid processing too many
+      if (claims.length > 10) {
+        logger.log('Limiting claims from', { originalCount: claims.length, limitTo: 10 })
+        claims = claims.slice(0, 10)
+      }
+
       logger.log('Parsed claims', { claimCount: claims.length })
 
       // Stage 2: Fact-check each claim using Gemini with search

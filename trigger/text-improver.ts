@@ -1,10 +1,11 @@
 import { anthropic } from '@ai-sdk/anthropic'
 import { logger, task } from '@trigger.dev/sdk/v3'
-import { generateText } from 'ai'
+import { convertToModelMessages, generateText } from 'ai'
 import removeMarkdown from 'remove-markdown'
 
 type TextImproverPayload = {
   text: string
+  pdfUrl?: string
   customPrompt?: string
   nodeId: string
   workflowId: string
@@ -14,9 +15,14 @@ export const textImproverTask = task({
   id: 'text-improver',
   maxDuration: 600, // 10 minutes
   run: async (payload: TextImproverPayload, { ctx }) => {
-    const { text, customPrompt, nodeId, workflowId } = payload
+    const { text, pdfUrl, customPrompt, nodeId, workflowId } = payload
 
-    logger.log('Starting text improver', { nodeId, textLength: text.length, hasCustomPrompt: !!customPrompt })
+    logger.log('Starting text improver', {
+      nodeId,
+      textLength: text.length,
+      hasPdfUrl: !!pdfUrl,
+      hasCustomPrompt: !!customPrompt,
+    })
 
     // Update status to running
     await updateConvexStatus(workflowId, nodeId, {
@@ -27,7 +33,7 @@ export const textImproverTask = task({
 
     try {
       // Default prompt if none provided
-      const defaultPrompt = `You are an expert writing assistant. Your task is to improve the following text by:
+      const defaultPrompt = `You are an expert writing assistant. Your task is to improve the document by:
 - Fixing grammar, spelling, and punctuation errors
 - Improving clarity and readability
 - Enhancing sentence structure and flow
@@ -38,12 +44,40 @@ export const textImproverTask = task({
 Provide ONLY the improved text without any explanations or markdown formatting.`
 
       const systemPrompt = customPrompt || defaultPrompt
+      const promptText = `${systemPrompt}\n\n${text ? `Text to improve:\n\n${text}\n\n` : ''}Improved text:`
 
       // Improve text using Anthropic
-      const result = await generateText({
-        model: anthropic('claude-sonnet-4-5'),
-        prompt: `${systemPrompt}\n\nText to improve:\n\n${text}\n\nImproved text:`,
-      })
+      // If PDF URL is provided, use that instead of text
+      let result
+      if (pdfUrl) {
+        const uiMessages = [
+          {
+            id: 'text-improver',
+            role: 'user' as const,
+            parts: [
+              {
+                type: 'file' as const,
+                url: pdfUrl,
+                mediaType: 'application/pdf',
+              },
+              {
+                type: 'text' as const,
+                text: promptText,
+              },
+            ],
+          },
+        ]
+
+        result = await generateText({
+          model: anthropic('claude-sonnet-4-5'),
+          messages: convertToModelMessages(uiMessages),
+        })
+      } else {
+        result = await generateText({
+          model: anthropic('claude-sonnet-4-5'),
+          prompt: promptText,
+        })
+      }
 
       logger.log('Text improved successfully', {
         originalLength: text.length,
@@ -56,9 +90,10 @@ Provide ONLY the improved text without any explanations or markdown formatting.`
       // Prepare output
       const output = {
         improvedText,
-        originalText: text,
+        originalText: text || (pdfUrl ? '[PDF Document]' : ''),
         originalLength: text.length,
         improvedLength: improvedText.length,
+        usedPdf: !!pdfUrl,
         usedCustomPrompt: !!customPrompt,
         timestamp: Date.now(),
       }

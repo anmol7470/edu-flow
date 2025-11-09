@@ -16,6 +16,7 @@ type NodeOutput = {
   feedback: string
   essayLength?: number
   essaySource?: string
+  essayPdfUrl?: string
   rubricUsed: string
   timestamp: number
 }

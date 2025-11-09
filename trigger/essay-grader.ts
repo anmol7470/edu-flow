@@ -116,6 +116,7 @@ Be constructive, specific, and actionable in your feedback. Format your response
         feedback: cleanFeedback,
         essayLength: essayPdfUrl ? 0 : 0, // PDF length not available
         essaySource: essayPdfUrl ? 'PDF Document' : 'Not provided',
+        essayPdfUrl: essayPdfUrl || undefined, // Pass through for downstream nodes
         rubricUsed: rubricType === 'pdf' ? 'PDF Rubric' : rubric.slice(0, 200) + (rubric.length > 200 ? '...' : ''),
         timestamp: Date.now(),
       }

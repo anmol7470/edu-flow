@@ -1,10 +1,11 @@
 import { google } from '@ai-sdk/google'
 import { logger, task } from '@trigger.dev/sdk/v3'
-import { generateText } from 'ai'
+import { convertToModelMessages, generateText } from 'ai'
 import removeMarkdown from 'remove-markdown'
 
 type ConceptExtractorPayload = {
   text: string
+  pdfUrls?: string[]
   nodeId: string
   workflowId: string
 }
@@ -13,9 +14,14 @@ export const conceptExtractorTask = task({
   id: 'concept-extractor',
   maxDuration: 600, // 10 minutes
   run: async (payload: ConceptExtractorPayload, { ctx }) => {
-    const { text, nodeId, workflowId } = payload
+    const { text, pdfUrls, nodeId, workflowId } = payload
 
-    logger.log('Starting concept extractor', { nodeId, textLength: text.length })
+    logger.log('Starting concept extractor', {
+      nodeId,
+      textLength: text.length,
+      hasPdfUrls: !!pdfUrls?.length,
+      pdfCount: pdfUrls?.length || 0,
+    })
 
     // Update status to running
     await updateConvexStatus(workflowId, nodeId, {
@@ -25,10 +31,8 @@ export const conceptExtractorTask = task({
     })
 
     try {
-      // Extract concepts using Gemini 2.5 Flash
-      const result = await generateText({
-        model: google('gemini-2.5-flash'),
-        prompt: `You are an expert at analyzing text and extracting key concepts. Your task is to carefully read the provided text and identify all important concepts, ideas, themes, and topics.
+      // Prepare prompt
+      const promptText = `You are an expert at analyzing text and extracting key concepts. Your task is to carefully read the provided document and identify all important concepts, ideas, themes, and topics.
 
 For each concept you extract:
 - Provide a clear concept name/title
@@ -37,12 +41,40 @@ For each concept you extract:
 
 Format your response as a structured list of concepts. Do not use markdown formatting.
 
-Text to analyze:
+${text ? `Text to analyze:\n\n${text}\n\n` : ''}Now extract and explain all key concepts from the document:`
 
-${text}
+      // Extract concepts using Gemini 2.5 Flash
+      // If PDF URLs are provided, pass them as file attachments
+      let result
+      if (pdfUrls && pdfUrls.length > 0) {
+        const uiMessages = [
+          {
+            id: 'concept-extractor',
+            role: 'user' as const,
+            parts: [
+              ...pdfUrls.map((url) => ({
+                type: 'file' as const,
+                url,
+                mediaType: 'application/pdf',
+              })),
+              {
+                type: 'text' as const,
+                text: promptText,
+              },
+            ],
+          },
+        ]
 
-Now extract and explain all key concepts from the above text:`,
-      })
+        result = await generateText({
+          model: google('gemini-2.5-flash'),
+          messages: convertToModelMessages(uiMessages),
+        })
+      } else {
+        result = await generateText({
+          model: google('gemini-2.5-flash'),
+          prompt: promptText,
+        })
+      }
 
       logger.log('Concepts extracted successfully', {
         outputLength: result.text.length,
@@ -56,6 +88,7 @@ Now extract and explain all key concepts from the above text:`,
         concepts: conceptsText,
         sourceTextLength: text.length,
         conceptsLength: conceptsText.length,
+        hasPdfInput: !!pdfUrls?.length,
         timestamp: Date.now(),
       }
 

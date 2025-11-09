@@ -122,6 +122,26 @@ function extractPdfUrlsFromParent(parentOutputs: any[]): string[] {
 }
 
 /**
+ * Helper: Extract original essay PDF URL from parent outputs (including passthrough from essay grader)
+ */
+function extractEssayPdfUrl(parentOutputs: any[]): string | undefined {
+  // First check if any parent is a PDF node directly
+  const directPdfUrls = extractPdfUrlsFromParent(parentOutputs)
+  if (directPdfUrls.length > 0) {
+    return directPdfUrls[0]
+  }
+  
+  // Check if any parent (like essay grader) passed through an essay PDF URL
+  for (const parent of parentOutputs) {
+    if (parent.output?.essayPdfUrl) {
+      return parent.output.essayPdfUrl
+    }
+  }
+  
+  return undefined
+}
+
+/**
  * Helper: Prepare payload for Trigger.dev tasks
  */
 function prepareTaskPayload(
@@ -153,18 +173,28 @@ function prepareTaskPayload(
         text: combinedInput,
       }
 
-    case 'text-improver':
+    case 'text-improver': {
+      // Check if there's an original essay PDF URL from parent chain
+      const essayPdfUrl = extractEssayPdfUrl(parentOutputs)
+      
+      // If we have a PDF URL, use that instead of combined text
+      // This ensures we improve the original essay, not the grading feedback
       return {
         ...basePayload,
-        text: combinedInput,
+        text: essayPdfUrl ? '' : combinedInput, // Don't use text if we have PDF
+        pdfUrl: essayPdfUrl,
         customPrompt: config.customPrompt,
       }
+    }
 
-    case 'concept-extractor':
+    case 'concept-extractor': {
+      const pdfUrls = extractPdfUrlsFromParent(parentOutputs)
       return {
         ...basePayload,
-        text: combinedInput,
+        text: combinedInput || '',
+        pdfUrls,
       }
+    }
 
     case 'fact-check': {
       const pdfUrls = extractPdfUrlsFromParent(parentOutputs)
