@@ -12,14 +12,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Trigger the YouTube summarizer task
-    const handle = await tasks.trigger<typeof youtubeSummarizerTask>(
-      'youtube-summarizer',
-      {
-        workflowId,
-        nodeId,
-        urls,
-      }
-    )
+    const handle = await tasks.trigger<typeof youtubeSummarizerTask>('youtube-summarizer', {
+      workflowId,
+      nodeId,
+      urls,
+    })
 
     return NextResponse.json({
       success: true,
@@ -36,4 +33,3 @@ export async function POST(req: NextRequest) {
     )
   }
 }
-

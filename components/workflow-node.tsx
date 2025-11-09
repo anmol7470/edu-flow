@@ -135,16 +135,12 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
               </div>
 
               {/* Progress indicator */}
-              {execution?.progress && (
-                <div className="text-xs text-gray-600 italic">{execution.progress}</div>
-              )}
+              {execution?.progress && <div className="text-xs text-gray-600 italic">{execution.progress}</div>}
 
               {/* Config indicator */}
               {hasConfig && (
                 <div className="flex items-center gap-1 text-xs text-gray-500">
-                  {type === 'youtube' && nodeData.config?.urls && (
-                    <span>{nodeData.config.urls.length} video(s)</span>
-                  )}
+                  {type === 'youtube' && nodeData.config?.urls && <span>{nodeData.config.urls.length} video(s)</span>}
                 </div>
               )}
 

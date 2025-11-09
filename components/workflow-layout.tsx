@@ -93,7 +93,8 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
 
       // Trigger each YouTube node
       for (const node of youtubeNodes) {
-        const config = nodeConfigs[node.id]
+        const config = nodeConfigs?.[node.id]
+        if (!config) continue
 
         // Call trigger.dev task
         await fetch('/api/trigger-youtube', {

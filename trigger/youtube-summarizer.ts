@@ -53,8 +53,8 @@ export const youtubeSummarizerTask = task({
 
         // Join transcript chunks into coherent text
         const fullText = Array.isArray(transcriptResult)
-          ? transcriptResult.map((chunk: any) => chunk.text).join(' ')
-          : transcriptResult
+          ? transcriptResult.map((chunk: { text: string }) => chunk.text).join(' ')
+          : String(transcriptResult)
 
         transcripts.push({
           title: video.title,
@@ -65,11 +65,12 @@ export const youtubeSummarizerTask = task({
         logger.log(`Video ${i + 1} transcript extracted`, {
           textLength: fullText.length,
         })
-      } catch (error: any) {
-        logger.error(`Failed to fetch video ${i + 1}`, { error: error.message })
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        logger.error(`Failed to fetch video ${i + 1}`, { error: errorMessage })
         await updateConvexStatus(workflowId, nodeId, {
           status: 'failed',
-          error: `Failed to fetch video ${i + 1}: ${error.message}`,
+          error: `Failed to fetch video ${i + 1}: ${errorMessage}`,
         })
         throw error
       }
@@ -89,9 +90,8 @@ export const youtubeSummarizerTask = task({
     try {
       // Summarize using Anthropic
       const summary = await generateText({
-        model: anthropic('claude-3-5-sonnet-20241022'),
+        model: anthropic('claude-sonnet-4-5'),
         prompt: `Summarize the following YouTube video transcripts. Create a comprehensive summary that captures the key points, main ideas, and important details from all videos:\n\n${combinedText}`,
-        maxTokens: 2000,
       })
 
       logger.log('Summary generated successfully', {
@@ -118,11 +118,12 @@ export const youtubeSummarizerTask = task({
       logger.log('Task completed successfully')
 
       return output
-    } catch (error: any) {
-      logger.error('Failed to generate summary', { error: error.message })
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      logger.error('Failed to generate summary', { error: errorMessage })
       await updateConvexStatus(workflowId, nodeId, {
         status: 'failed',
-        error: `Failed to generate summary: ${error.message}`,
+        error: `Failed to generate summary: ${errorMessage}`,
       })
       throw error
     }
@@ -142,7 +143,13 @@ async function updateConvexStatus(
   }
 ) {
   try {
-    const response = await fetch(`${process.env.CONVEX_SITE_URL}/updateNodeExecution`, {
+    const convexUrl = process.env.CONVEX_SITE_URL
+    if (!convexUrl) {
+      console.warn('CONVEX_SITE_URL environment variable is not set. Skipping status update.')
+      return
+    }
+
+    const response = await fetch(`${convexUrl}/updateNodeExecution`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
