@@ -42,3 +42,9 @@ yarn-error.log*
 next-env.d.ts
 
 .trigger/
+
+# python
+.venv/
+novaact/.venv/
+__pycache__/
+*.pyc

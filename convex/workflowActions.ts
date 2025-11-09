@@ -91,6 +91,7 @@ function getTaskIdForNodeType(nodeType: string): string | null {
   const taskIds: Record<string, string> = {
     youtube: 'youtube-analyzer',
     'web-search': 'web-search',
+    'web-browser-agent': 'web-agent',
     summarizer: 'text-summarizer',
     'text-improver': 'text-improver',
     'concept-extractor': 'concept-extractor',
@@ -165,6 +166,14 @@ function prepareTaskPayload(
       return {
         ...basePayload,
         prompt: config.prompt || combinedInput,
+      }
+
+    case 'web-browser-agent':
+      return {
+        ...basePayload,
+        startingPage: config.startingPage || 'https://www.google.com',
+        instructions: config.instructions || combinedInput,
+        headless: config.headless !== undefined ? config.headless : true,
       }
 
     case 'summarizer':

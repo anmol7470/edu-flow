@@ -1,21 +1,22 @@
-import { youtubeAnalyzerTask } from '@/trigger/youtube-analyzer'
+import { webAgentTask } from '@/trigger/web-agent'
 import { tasks } from '@trigger.dev/sdk/v3'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { workflowId, nodeId, urls } = body
+    const { workflowId, nodeId, startingPage, instructions, headless } = body
 
-    if (!workflowId || !nodeId || !urls || !Array.isArray(urls)) {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    if (!workflowId || !nodeId || !startingPage || !instructions) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Trigger the YouTube analyzer task
-    const handle = await tasks.trigger<typeof youtubeAnalyzerTask>('youtube-analyzer', {
+    const handle = await tasks.trigger<typeof webAgentTask>('web-agent', {
       workflowId,
       nodeId,
-      urls,
+      startingPage,
+      instructions,
+      headless: headless ?? true,
     })
 
     return NextResponse.json({
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
       runId: handle.id,
     })
   } catch (error: unknown) {
-    console.error('Error triggering YouTube summarizer:', error)
+    console.error('Error triggering web agent:', error)
     return NextResponse.json(
       {
         error: 'Failed to trigger task',

@@ -1,4 +1,5 @@
 import {
+  Bot,
   Calendar,
   FileEdit,
   FileText,
@@ -55,6 +56,10 @@ export const nodeConfig: Record<string, NodeType> = {
   'concept-extractor': {
     icon: Lightbulb,
     color: 'text-yellow-600',
+  },
+  'web-browser-agent': {
+    icon: Bot,
+    color: 'text-fuchsia-600',
   },
   'essay-grader': {
     icon: FileEdit,

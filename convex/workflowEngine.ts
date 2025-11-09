@@ -275,7 +275,10 @@ export const resetWorkflowExecution = mutation({
 
     return {
       success: true,
-      message: executions.length > 0 ? `Reset workflow - cleared ${executions.length} node execution(s)` : 'Workflow already clean',
+      message:
+        executions.length > 0
+          ? `Reset workflow - cleared ${executions.length} node execution(s)`
+          : 'Workflow already clean',
       clearedNodes: executions.length,
     }
   },
@@ -441,6 +444,7 @@ function getApiEndpointForNodeType(nodeType: string): string | null {
     youtube: '/api/trigger-youtube',
     pdf: '/api/trigger-pdf',
     'web-search': '/api/trigger-web-search',
+    'web-browser-agent': '/api/trigger-web-agent',
     summarizer: '/api/trigger-text-summarizer',
     'text-improver': '/api/trigger-text-improver',
     'concept-extractor': '/api/trigger-concept-extractor',

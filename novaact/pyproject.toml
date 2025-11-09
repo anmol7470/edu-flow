@@ -1,0 +1,12 @@
+[project]
+name = "novaact"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.121.1",
+    "nova-act>=2.1.319.0",
+    "python-dotenv>=1.2.1",
+    "uvicorn>=0.38.0",
+]

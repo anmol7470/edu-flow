@@ -224,6 +224,15 @@ export function validateNodeConfigurations(nodes: Node[], nodeConfigs: Record<st
         }
         break
 
+      case 'web-browser-agent':
+        if (!config?.startingPage || (config.startingPage as string).trim() === '') {
+          missingFields.push('Starting page URL')
+        }
+        if (!config?.instructions || (config.instructions as string).trim() === '') {
+          missingFields.push('Instructions')
+        }
+        break
+
       case 'summarizer':
       case 'concept-extractor':
       case 'fact-check':

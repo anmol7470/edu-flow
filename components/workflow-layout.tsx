@@ -8,6 +8,7 @@ import { StudyPlanSheet } from '@/components/study-plan-sheet'
 import { TextImproverSheet } from '@/components/text-improver-sheet'
 import { TextSummarizerSheet } from '@/components/text-summarizer-sheet'
 import { Button } from '@/components/ui/button'
+import { WebAgentSheet } from '@/components/web-agent-sheet'
 import { WebSearchSheet } from '@/components/web-search-sheet'
 import { WorkflowCanvas } from '@/components/workflow-canvas'
 import { WorkflowSidebar } from '@/components/workflow-sidebar'
@@ -36,6 +37,7 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   const [factCheckerSheetOpen, setFactCheckerSheetOpen] = useState(false)
   const [essayGraderSheetOpen, setEssayGraderSheetOpen] = useState(false)
   const [studyPlanSheetOpen, setStudyPlanSheetOpen] = useState(false)
+  const [webAgentSheetOpen, setWebAgentSheetOpen] = useState(false)
 
   const {
     data: workflow,
@@ -116,6 +118,8 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
         setEssayGraderSheetOpen(true)
       } else if (node?.data?.type === 'study-plan') {
         setStudyPlanSheetOpen(true)
+      } else if (node?.data?.type === 'web-browser-agent') {
+        setWebAgentSheetOpen(true)
       }
     }
   }
@@ -316,6 +320,15 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
           <StudyPlanSheet
             open={studyPlanSheetOpen}
             onOpenChange={setStudyPlanSheetOpen}
+            workflowId={workflowId}
+            nodeId={selectedNodeId}
+            initialConfig={nodeConfigs?.[selectedNodeId]}
+          />
+        )}
+        {selectedNodeType === 'web-browser-agent' && selectedNodeId && (
+          <WebAgentSheet
+            open={webAgentSheetOpen}
+            onOpenChange={setWebAgentSheetOpen}
             workflowId={workflowId}
             nodeId={selectedNodeId}
             initialConfig={nodeConfigs?.[selectedNodeId]}

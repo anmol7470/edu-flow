@@ -8,15 +8,18 @@ export default defineConfig({
   // You can override this on an individual task.
   // See https://trigger.dev/docs/runs/max-duration
   maxDuration: 3600,
+  // retries: {
+  //   enabledInDev: true,
+  //   default: {
+  //     maxAttempts: 3,
+  //     minTimeoutInMs: 1000,
+  //     maxTimeoutInMs: 10000,
+  //     factor: 2,
+  //     randomize: true,
+  //   },
+  // },
   retries: {
-    enabledInDev: true,
-    default: {
-      maxAttempts: 3,
-      minTimeoutInMs: 1000,
-      maxTimeoutInMs: 10000,
-      factor: 2,
-      randomize: true,
-    },
+    enabledInDev: false,
   },
   dirs: ['trigger'],
 })
