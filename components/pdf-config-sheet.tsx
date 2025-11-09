@@ -37,12 +37,14 @@ export function PDFConfigSheet({ open, onOpenChange, workflowId, nodeId, initial
   const MAX_FILES = 5
   const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
-  // Sync uploaded files with initialConfig when component mounts or initialConfig changes
+  // Sync uploaded files with initialConfig when nodeId changes
   useEffect(() => {
     if (initialConfig?.files && Array.isArray(initialConfig.files)) {
       setUploadedFiles(initialConfig.files)
+    } else {
+      setUploadedFiles([])
     }
-  }, [initialConfig])
+  }, [nodeId, initialConfig?.files])
 
   // Reset files when sheet closes
   useEffect(() => {

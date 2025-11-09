@@ -41,12 +41,10 @@ export function WebSearchSheet({ open, onOpenChange, workflowId, nodeId, initial
   const hasOutput = nodeExecution?.status === 'completed' && nodeExecution?.output
   const output = hasOutput ? (nodeExecution.output as NodeOutput) : null
 
-  // Load initial config
+  // Load initial config - reset prompt when nodeId changes
   useEffect(() => {
-    if (initialConfig?.prompt) {
-      setPrompt(initialConfig.prompt)
-    }
-  }, [initialConfig])
+    setPrompt(initialConfig?.prompt || '')
+  }, [nodeId, initialConfig?.prompt])
 
   // Auto-switch to output tab when output becomes available
   useEffect(() => {

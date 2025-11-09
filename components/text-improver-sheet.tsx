@@ -37,12 +37,10 @@ export function TextImproverSheet({ open, onOpenChange, workflowId, nodeId, init
   const hasOutput = nodeExecution?.status === 'completed' && nodeExecution?.output
   const output = hasOutput ? (nodeExecution.output as NodeOutput) : null
 
-  // Load initial config
+  // Load initial config - reset when nodeId changes
   useEffect(() => {
-    if (initialConfig?.customPrompt) {
-      setCustomPrompt(initialConfig.customPrompt)
-    }
-  }, [initialConfig])
+    setCustomPrompt(initialConfig?.customPrompt || '')
+  }, [nodeId, initialConfig?.customPrompt])
 
   // Auto-switch to output tab when output becomes available
   useEffect(() => {

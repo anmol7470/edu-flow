@@ -79,10 +79,18 @@ export function YouTubeConfigSheet({ open, onOpenChange, workflowId, nodeId, ini
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      url1: initialConfig?.urls?.[0] || '',
-      url2: initialConfig?.urls?.[1] || '',
+      url1: '',
+      url2: '',
     },
   })
+
+  // Reset form when nodeId changes
+  useEffect(() => {
+    form.reset({
+      url1: initialConfig?.urls?.[0] || '',
+      url2: initialConfig?.urls?.[1] || '',
+    })
+  }, [nodeId, form, initialConfig?.urls])
 
   const onSubmit = async (values: FormValues) => {
     try {

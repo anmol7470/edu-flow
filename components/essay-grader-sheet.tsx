@@ -36,11 +36,11 @@ type EssayGraderSheetProps = {
 
 export function EssayGraderSheet({ open, onOpenChange, workflowId, nodeId, initialConfig }: EssayGraderSheetProps) {
   const [activeTab, setActiveTab] = useState<'config' | 'output'>('config')
-  const [rubricType, setRubricType] = useState<'text' | 'pdf'>(initialConfig?.rubricType || 'text')
-  const [rubricText, setRubricText] = useState(initialConfig?.rubricText || '')
+  const [rubricType, setRubricType] = useState<'text' | 'pdf'>('text')
+  const [rubricText, setRubricText] = useState('')
   const [pdfFile, setPdfFile] = useState<File | null>(null)
-  const [uploadedPdfUrl, setUploadedPdfUrl] = useState(initialConfig?.rubricPdfUrl || '')
-  const [uploadedPdfName, setUploadedPdfName] = useState(initialConfig?.rubricPdfName || '')
+  const [uploadedPdfUrl, setUploadedPdfUrl] = useState('')
+  const [uploadedPdfName, setUploadedPdfName] = useState('')
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -52,15 +52,14 @@ export function EssayGraderSheet({ open, onOpenChange, workflowId, nodeId, initi
   const hasOutput = nodeExecution?.status === 'completed' && nodeExecution?.output
   const output = hasOutput ? (nodeExecution.output as NodeOutput) : null
 
-  // Load initial config
+  // Load initial config - reset when nodeId changes
   useEffect(() => {
-    if (initialConfig) {
-      if (initialConfig.rubricType) setRubricType(initialConfig.rubricType)
-      if (initialConfig.rubricText) setRubricText(initialConfig.rubricText)
-      if (initialConfig.rubricPdfUrl) setUploadedPdfUrl(initialConfig.rubricPdfUrl)
-      if (initialConfig.rubricPdfName) setUploadedPdfName(initialConfig.rubricPdfName)
-    }
-  }, [initialConfig])
+    setRubricType(initialConfig?.rubricType || 'text')
+    setRubricText(initialConfig?.rubricText || '')
+    setUploadedPdfUrl(initialConfig?.rubricPdfUrl || '')
+    setUploadedPdfName(initialConfig?.rubricPdfName || '')
+    setPdfFile(null)
+  }, [nodeId, initialConfig?.rubricType, initialConfig?.rubricText, initialConfig?.rubricPdfUrl, initialConfig?.rubricPdfName])
 
   // Auto-switch to output tab when output becomes available
   useEffect(() => {

@@ -45,17 +45,26 @@ type StudyPlanSheetProps = {
 
 export function StudyPlanSheet({ open, onOpenChange, workflowId, nodeId, initialConfig }: StudyPlanSheetProps) {
   const [activeTab, setActiveTab] = useState<'config' | 'output'>('config')
-  const [topic, setTopic] = useState(initialConfig?.topic || '')
-  const [duration, setDuration] = useState(initialConfig?.duration || '4 weeks')
-  const [learningStyle, setLearningStyle] = useState(initialConfig?.learningStyle || 'Visual')
-  const [goals, setGoals] = useState(initialConfig?.goals || '')
-  const [currentLevel, setCurrentLevel] = useState(initialConfig?.currentLevel || 'Beginner')
+  const [topic, setTopic] = useState('')
+  const [duration, setDuration] = useState('4 weeks')
+  const [learningStyle, setLearningStyle] = useState('Visual')
+  const [goals, setGoals] = useState('')
+  const [currentLevel, setCurrentLevel] = useState('Beginner')
 
   const nodeExecution = useQuery(api.nodeExecutions.getNodeExecution, { workflowId, nodeId })
   const saveNodeConfig = useMutation(api.nodeExecutions.saveNodeConfig)
 
   const hasOutput = nodeExecution?.status === 'completed' && nodeExecution?.output
   const output = hasOutput ? (nodeExecution.output as NodeOutput) : null
+
+  // Load initial config - reset when nodeId changes
+  useEffect(() => {
+    setTopic(initialConfig?.topic || '')
+    setDuration(initialConfig?.duration || '4 weeks')
+    setLearningStyle(initialConfig?.learningStyle || 'Visual')
+    setGoals(initialConfig?.goals || '')
+    setCurrentLevel(initialConfig?.currentLevel || 'Beginner')
+  }, [nodeId, initialConfig?.topic, initialConfig?.duration, initialConfig?.learningStyle, initialConfig?.goals, initialConfig?.currentLevel])
 
   // Auto-switch to output tab when output becomes available
   useEffect(() => {
