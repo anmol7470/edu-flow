@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ConvexError, v } from 'convex/values'
 import { internal } from './_generated/api'
 import { internalMutation, mutation } from './_generated/server'

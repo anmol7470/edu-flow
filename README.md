@@ -11,13 +11,14 @@ EduFlow is a modern web application that combines visual workflow building with 
 ### Available Workflow Nodes
 
 - **Essay Grader** - Grade essays using AI with customizable rubrics (supports PDF documents)
-- **Fact Checker** - Verify claims and check facts in text
+- **Fact Checker** - Verify claims and check facts in text using web search
 - **Text Improver** - Enhance writing quality, grammar, and style
 - **Text Summarizer** - Generate concise summaries of long content
 - **Concept Extractor** - Extract key concepts and topics from text
 - **Study Plan Generator** - Create personalized study plans
 - **Web Search** - Search the web for information
-- **YouTube Analyzer** - Analyze YouTube video content
+- **YouTube Analyzer** - Scrape YouTube video transcript for text analysis
+- **Web Browser Agent** - Headless agentic browser automation tool
 
 ### Workflow Features
 
@@ -47,6 +48,7 @@ EduFlow is a modern web application that combines visual workflow building with 
 - **[Better Auth](https://www.better-auth.com/)** - Authentication system
 - **[Supadata](https://supadata.com/)** - Web & Video to text API for makers
 - **[Vercel AI SDK](https://sdk.vercel.ai/)** - AI model integration library
+- **[Nova Act](https://nova.amazon.com/act)** - Headless agentic browser automation tool
 
 ### AI Models
 
@@ -105,18 +107,14 @@ edu-flow/
 │   ├── auth-client.ts            # Auth client utilities
 │   └── utils.ts                  # General utilities
 │
+├── novaact/                      # NovaAct Python API server
+│   ├── main.py                   # Main API server
+│   └── pyproject.toml            # Python project configuration
+│
 └── trigger.config.ts             # Trigger.dev configuration
 ```
 
 ## Getting Started
-
-### Prerequisites
-
-- **Bun** (latest version)
-- **Node.js** 18+ (for Trigger.dev)
-- **Convex Account** (free tier available)
-- **Trigger.dev Account** (free tier available)
-- **Anthropic API Key** (for Claude AI)
 
 ### Installation
 
@@ -151,6 +149,14 @@ bun run dev:convex
 ```bash
 # Login to Trigger.dev
 bun run dev:trigger
+```
+
+6. Setup NovaAct Python API server:
+
+```bash
+cd novaact
+uv sync
+uv run main.py
 ```
 
 6. Start the development server:

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use node'
 
 import { tasks } from '@trigger.dev/sdk/v3'
