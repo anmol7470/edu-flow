@@ -3,60 +3,74 @@ import { logger, task } from '@trigger.dev/sdk/v3'
 import { generateText } from 'ai'
 import removeMarkdown from 'remove-markdown'
 
-type TextSummarizerPayload = {
-  text: string
+type EssayGraderPayload = {
+  essayText: string
+  rubric: string
   nodeId: string
   workflowId: string
 }
 
-export const textSummarizerTask = task({
-  id: 'text-summarizer',
+export const essayGraderTask = task({
+  id: 'essay-grader',
   maxDuration: 600, // 10 minutes
-  run: async (payload: TextSummarizerPayload, { ctx }) => {
-    const { text, nodeId, workflowId } = payload
+  run: async (payload: EssayGraderPayload, { ctx }) => {
+    const { essayText, rubric, nodeId, workflowId } = payload
 
-    logger.log('Starting text summarizer', { nodeId, textLength: text.length })
+    logger.log('Starting essay grading', {
+      nodeId,
+      essayLength: essayText.length,
+      rubricLength: rubric.length,
+    })
 
     // Update status to running
     await updateConvexStatus(workflowId, nodeId, {
       status: 'running',
-      progress: 'Analyzing text...',
+      progress: 'Grading essay...',
       runId: ctx.run.id,
     })
 
     try {
-      // Generate summary using Anthropic
-      const summary = await generateText({
+      // Use Sonnet 4.5 to grade the essay
+      const gradingResult = await generateText({
         model: anthropic('claude-sonnet-4-5'),
-        prompt: `You are an expert text summarizer. Your task is to create a comprehensive, well-structured summary of the provided text.
+        prompt: `You are an experienced educator and essay grader. Grade the following essay according to the provided rubric.
 
-Instructions:
-- Read the text carefully and extract the main ideas, key points, and important details
-- Create a clear, concise summary that captures the essence of the content
-- Organize the summary logically with proper structure
-- Write in clear, plain text without markdown formatting
-- If the text is from multiple sources, organize the summary accordingly
-- Focus on the most important information and skip redundant details
+RUBRIC:
+${rubric}
 
-Text to summarize:
+ESSAY TO GRADE:
+${essayText}
 
-${text}
+Provide a comprehensive evaluation including:
+1. Overall grade/score
+2. Detailed feedback for each rubric criterion
+3. Strengths of the essay
+4. Areas for improvement
+5. Specific suggestions for revision
+6. Final summary and grade justification
 
-Now provide a comprehensive summary:`,
+Be constructive, specific, and actionable in your feedback. Format your response clearly without using markdown.`,
       })
 
-      logger.log('Summary generated successfully', {
-        summaryLength: summary.text.length,
+      logger.log('Grading completed', {
+        feedbackLength: gradingResult.text.length,
       })
 
-      // Remove markdown formatting from the summary
-      const plainTextSummary = removeMarkdown(summary.text)
+      // Remove markdown formatting
+      const cleanFeedback = removeMarkdown(gradingResult.text)
+
+      // Try to extract overall grade/score
+      const gradeMatch = cleanFeedback.match(
+        /(?:overall grade|final grade|grade|score):\s*([A-F][+-]?|\d+(?:\.\d+)?(?:\/\d+)?|[A-F]|[0-9]{1,3}%)/i
+      )
+      const overallGrade = gradeMatch ? gradeMatch[1] : 'See feedback'
 
       // Prepare output
       const output = {
-        summary: plainTextSummary,
-        originalLength: text.length,
-        summaryLength: plainTextSummary.length,
+        overallGrade,
+        feedback: cleanFeedback,
+        essayLength: essayText.length,
+        rubricUsed: rubric.slice(0, 200) + (rubric.length > 200 ? '...' : ''),
         timestamp: Date.now(),
       }
 
@@ -66,18 +80,15 @@ Now provide a comprehensive summary:`,
         progress: undefined,
       })
 
-      logger.log('Task completed successfully', {
-        originalLength: output.originalLength,
-        summaryLength: output.summaryLength,
-      })
+      logger.log('Task completed successfully', { grade: overallGrade })
 
       return output
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
-      logger.error('Failed to generate summary', { error: errorMessage })
+      logger.error('Failed to grade essay', { error: errorMessage })
       await updateConvexStatus(workflowId, nodeId, {
         status: 'failed',
-        error: `Failed to generate summary: ${errorMessage}`,
+        error: `Failed to grade essay: ${errorMessage}`,
       })
       throw error
     }

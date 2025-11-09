@@ -80,7 +80,7 @@ export function TextImproverSheet({ open, onOpenChange, workflowId, nodeId, init
             className={cn(
               'px-4 py-2 text-sm font-medium transition-colors',
               activeTab === 'config'
-                ? 'border-b-2 border-primary text-primary'
+                ? 'border-primary text-primary border-b-2'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -92,7 +92,7 @@ export function TextImproverSheet({ open, onOpenChange, workflowId, nodeId, init
             className={cn(
               'px-4 py-2 text-sm font-medium transition-colors',
               activeTab === 'output'
-                ? 'border-b-2 border-primary text-primary'
+                ? 'border-primary text-primary border-b-2'
                 : 'text-muted-foreground hover:text-foreground',
               !hasOutput && 'cursor-not-allowed opacity-50'
             )}
@@ -104,12 +104,12 @@ export function TextImproverSheet({ open, onOpenChange, workflowId, nodeId, init
         <div className="mt-4 flex-1 overflow-y-auto">
           {activeTab === 'config' && (
             <div className="space-y-4">
-              <div className="rounded-lg border bg-muted/50 p-4">
+              <div className="bg-muted/50 rounded-lg border p-4">
                 <div className="mb-2 flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-yellow-600" />
                   <h3 className="text-sm font-semibold">Custom Prompt (Optional)</h3>
                 </div>
-                <p className="mb-3 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mb-3 text-xs">
                   Provide specific instructions for how you want the text to be improved. If left empty, a default
                   improvement prompt will be used.
                 </p>
@@ -122,7 +122,7 @@ export function TextImproverSheet({ open, onOpenChange, workflowId, nodeId, init
                     value={customPrompt}
                     onChange={(e) => setCustomPrompt(e.target.value)}
                     placeholder="Example: Make the text more formal and academic..."
-                    className="min-h-[150px] w-full rounded-md border bg-background p-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="bg-background placeholder:text-muted-foreground focus:ring-ring min-h-[150px] w-full rounded-md border p-3 text-sm focus:ring-2 focus:outline-none"
                   />
                   <Button onClick={handleSaveConfig} className="w-full">
                     Save Custom Prompt
@@ -132,7 +132,7 @@ export function TextImproverSheet({ open, onOpenChange, workflowId, nodeId, init
 
               <div className="rounded-lg border bg-blue-50 p-4 dark:bg-blue-950/50">
                 <h4 className="mb-2 text-sm font-semibold">Default Behavior</h4>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   If no custom prompt is set, the AI will improve the text by fixing grammar, enhancing clarity,
                   improving sentence structure, and making it more professional and polished.
                 </p>
@@ -144,16 +144,16 @@ export function TextImproverSheet({ open, onOpenChange, workflowId, nodeId, init
             <div className="space-y-6">
               {/* Stats */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-lg border bg-muted/50 p-3">
-                  <div className="text-xs text-muted-foreground">Original</div>
+                <div className="bg-muted/50 rounded-lg border p-3">
+                  <div className="text-muted-foreground text-xs">Original</div>
                   <div className="text-2xl font-bold">{output.originalLength.toLocaleString()}</div>
                 </div>
-                <div className="rounded-lg border bg-muted/50 p-3">
-                  <div className="text-xs text-muted-foreground">Improved</div>
+                <div className="bg-muted/50 rounded-lg border p-3">
+                  <div className="text-muted-foreground text-xs">Improved</div>
                   <div className="text-2xl font-bold">{output.improvedLength.toLocaleString()}</div>
                 </div>
-                <div className="rounded-lg border bg-muted/50 p-3">
-                  <div className="text-xs text-muted-foreground">Prompt Type</div>
+                <div className="bg-muted/50 rounded-lg border p-3">
+                  <div className="text-muted-foreground text-xs">Prompt Type</div>
                   <div className="text-xs font-medium">{output.usedCustomPrompt ? 'Custom' : 'Default'}</div>
                 </div>
               </div>
@@ -162,8 +162,8 @@ export function TextImproverSheet({ open, onOpenChange, workflowId, nodeId, init
               <div className="space-y-4">
                 <div>
                   <h3 className="mb-2 text-sm font-semibold">Original Text</h3>
-                  <div className="max-h-[200px] overflow-y-auto rounded-lg border bg-muted/30 p-4">
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                  <div className="bg-muted/30 max-h-[200px] overflow-y-auto rounded-lg border p-4">
+                    <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
                       {output.originalText}
                     </p>
                   </div>
@@ -176,13 +176,13 @@ export function TextImproverSheet({ open, onOpenChange, workflowId, nodeId, init
                 <div>
                   <h3 className="mb-2 text-sm font-semibold">Improved Text</h3>
                   <div className="max-h-[300px] overflow-y-auto rounded-lg border bg-green-50 p-4 dark:bg-green-950/30">
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed">{output.improvedText}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{output.improvedText}</p>
                   </div>
                 </div>
               </div>
 
               {/* Timestamp */}
-              <div className="text-xs text-muted-foreground">
+              <div className="text-muted-foreground text-xs">
                 Completed: {new Date(output.timestamp).toLocaleString()}
               </div>
             </div>
@@ -192,4 +192,3 @@ export function TextImproverSheet({ open, onOpenChange, workflowId, nodeId, init
     </Sheet>
   )
 }
-

@@ -1,21 +1,21 @@
-import { textImproverTask } from '@/trigger/text-improver'
+import { essayGraderTask } from '@/trigger/essay-grader'
 import { tasks } from '@trigger.dev/sdk/v3'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { workflowId, nodeId, text, customPrompt } = body
+    const { workflowId, nodeId, essayText, rubric } = body
 
-    if (!workflowId || !nodeId || !text) {
+    if (!workflowId || !nodeId || !essayText || !rubric) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const handle = await tasks.trigger<typeof textImproverTask>('text-improver', {
+    const handle = await tasks.trigger<typeof essayGraderTask>('essay-grader', {
       workflowId,
       nodeId,
-      text,
-      customPrompt,
+      essayText,
+      rubric,
     })
 
     return NextResponse.json({
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       runId: handle.id,
     })
   } catch (error: unknown) {
-    console.error('Error triggering text improver:', error)
+    console.error('Error triggering essay grader:', error)
     return NextResponse.json(
       {
         error: 'Failed to trigger task',

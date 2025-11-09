@@ -43,15 +43,15 @@ export function ConceptExtractorSheet({ open, onOpenChange, workflowId, nodeId }
           <SheetDescription>Key concepts identified from the text using Gemini 2.5 Flash.</SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 flex-1 overflow-y-auto space-y-6">
+        <div className="mt-6 flex-1 space-y-6 overflow-y-auto">
           {/* Stats Section */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg border bg-muted/50 p-3">
-              <div className="text-xs text-muted-foreground">Source Length</div>
+            <div className="bg-muted/50 rounded-lg border p-3">
+              <div className="text-muted-foreground text-xs">Source Length</div>
               <div className="text-2xl font-bold">{output.sourceTextLength.toLocaleString()}</div>
             </div>
-            <div className="rounded-lg border bg-muted/50 p-3">
-              <div className="text-xs text-muted-foreground">Concepts Length</div>
+            <div className="bg-muted/50 rounded-lg border p-3">
+              <div className="text-muted-foreground text-xs">Concepts Length</div>
               <div className="text-2xl font-bold">{output.conceptsLength.toLocaleString()}</div>
             </div>
           </div>
@@ -59,18 +59,15 @@ export function ConceptExtractorSheet({ open, onOpenChange, workflowId, nodeId }
           {/* Concepts Section */}
           <div>
             <h3 className="mb-2 text-sm font-semibold">Extracted Concepts</h3>
-            <div className="rounded-lg border bg-muted/50 p-4">
-              <p className="whitespace-pre-wrap text-sm leading-relaxed">{output.concepts}</p>
+            <div className="bg-muted/50 rounded-lg border p-4">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{output.concepts}</p>
             </div>
           </div>
 
           {/* Timestamp */}
-          <div className="text-xs text-muted-foreground">
-            Completed: {new Date(output.timestamp).toLocaleString()}
-          </div>
+          <div className="text-muted-foreground text-xs">Completed: {new Date(output.timestamp).toLocaleString()}</div>
         </div>
       </SheetContent>
     </Sheet>
   )
 }
-

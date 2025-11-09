@@ -1,11 +1,14 @@
 'use client'
 
 import { ConceptExtractorSheet } from '@/components/concept-extractor-sheet'
+import { EssayGraderSheet } from '@/components/essay-grader-sheet'
+import { FactCheckerSheet } from '@/components/fact-checker-sheet'
 import { PDFConfigSheet } from '@/components/pdf-config-sheet'
+import { StudyPlanSheet } from '@/components/study-plan-sheet'
 import { TextImproverSheet } from '@/components/text-improver-sheet'
 import { TextSummarizerSheet } from '@/components/text-summarizer-sheet'
-import { WebSearchSheet } from '@/components/web-search-sheet'
 import { Button } from '@/components/ui/button'
+import { WebSearchSheet } from '@/components/web-search-sheet'
 import { WorkflowCanvas } from '@/components/workflow-canvas'
 import { WorkflowSidebar } from '@/components/workflow-sidebar'
 import { WorkflowTitleEditor } from '@/components/workflow-title-editor'
@@ -30,6 +33,9 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   const [improverSheetOpen, setImproverSheetOpen] = useState(false)
   const [conceptExtractorSheetOpen, setConceptExtractorSheetOpen] = useState(false)
   const [webSearchSheetOpen, setWebSearchSheetOpen] = useState(false)
+  const [factCheckerSheetOpen, setFactCheckerSheetOpen] = useState(false)
+  const [essayGraderSheetOpen, setEssayGraderSheetOpen] = useState(false)
+  const [studyPlanSheetOpen, setStudyPlanSheetOpen] = useState(false)
 
   const {
     data: workflow,
@@ -84,6 +90,12 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
         setConceptExtractorSheetOpen(true)
       } else if (node?.data?.type === 'web-search') {
         setWebSearchSheetOpen(true)
+      } else if (node?.data?.type === 'fact-check') {
+        setFactCheckerSheetOpen(true)
+      } else if (node?.data?.type === 'essay-grader') {
+        setEssayGraderSheetOpen(true)
+      } else if (node?.data?.type === 'study-plan') {
+        setStudyPlanSheetOpen(true)
       }
     }
   }
@@ -222,6 +234,32 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
           <WebSearchSheet
             open={webSearchSheetOpen}
             onOpenChange={setWebSearchSheetOpen}
+            workflowId={workflowId}
+            nodeId={selectedNodeId}
+            initialConfig={nodeConfigs?.[selectedNodeId]}
+          />
+        )}
+        {selectedNodeType === 'fact-check' && selectedNodeId && (
+          <FactCheckerSheet
+            open={factCheckerSheetOpen}
+            onOpenChange={setFactCheckerSheetOpen}
+            workflowId={workflowId}
+            nodeId={selectedNodeId}
+          />
+        )}
+        {selectedNodeType === 'essay-grader' && selectedNodeId && (
+          <EssayGraderSheet
+            open={essayGraderSheetOpen}
+            onOpenChange={setEssayGraderSheetOpen}
+            workflowId={workflowId}
+            nodeId={selectedNodeId}
+            initialConfig={nodeConfigs?.[selectedNodeId]}
+          />
+        )}
+        {selectedNodeType === 'study-plan' && selectedNodeId && (
+          <StudyPlanSheet
+            open={studyPlanSheetOpen}
+            onOpenChange={setStudyPlanSheetOpen}
             workflowId={workflowId}
             nodeId={selectedNodeId}
             initialConfig={nodeConfigs?.[selectedNodeId]}

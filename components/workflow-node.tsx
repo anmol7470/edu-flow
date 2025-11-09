@@ -41,8 +41,14 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
   const execution = nodeData?.execution
   const hasConfig = nodeData?.config && Object.keys(nodeData.config).length > 0
   const hasOutput = execution?.status === 'completed' && execution?.output
-  const isOutputNode = type === 'summarizer' || type === 'concept-extractor' // Nodes that only show output, not config
-  const hasConfigSheet = type === 'youtube' || type === 'pdf' || type === 'text-improver' || type === 'web-search' // Nodes with config sheets
+  const isOutputNode = type === 'summarizer' || type === 'concept-extractor' || type === 'fact-check' // Nodes that only show output, not config
+  const hasConfigSheet =
+    type === 'youtube' ||
+    type === 'pdf' ||
+    type === 'text-improver' ||
+    type === 'web-search' ||
+    type === 'essay-grader' ||
+    type === 'study-plan' // Nodes with config sheets
 
   // Status icon mapping
   const statusIcon = {
@@ -223,20 +229,22 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
                 Replace with
               </ContextMenuSubTrigger>
               <ContextMenuSubContent>
-                {availableNodeTypes.map((nodeType) => {
-                  const nodeTypeConfig = nodeConfig[nodeType.id] || nodeConfig.default
-                  const NodeIcon = nodeTypeConfig.icon
-                  return (
-                    <ContextMenuItem
-                      key={nodeType.id}
-                      onClick={() => handleReplace(nodeType.id)}
-                      disabled={type === nodeType.id}
-                    >
-                      <NodeIcon className="h-4 w-4" />
-                      {nodeType.label}
-                    </ContextMenuItem>
-                  )
-                })}
+                {availableNodeTypes
+                  .filter((nodeType) => nodeType.id !== 'start')
+                  .map((nodeType) => {
+                    const nodeTypeConfig = nodeConfig[nodeType.id] || nodeConfig.default
+                    const NodeIcon = nodeTypeConfig.icon
+                    return (
+                      <ContextMenuItem
+                        key={nodeType.id}
+                        onClick={() => handleReplace(nodeType.id)}
+                        disabled={type === nodeType.id}
+                      >
+                        <NodeIcon className="h-4 w-4" />
+                        {nodeType.label}
+                      </ContextMenuItem>
+                    )
+                  })}
               </ContextMenuSubContent>
             </ContextMenuSub>
             <ContextMenuItem variant="destructive" onClick={handleDelete}>

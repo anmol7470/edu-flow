@@ -33,7 +33,7 @@ export function TextSummarizerSheet({ open, onOpenChange, workflowId, nodeId }: 
             <SheetTitle>Text Summarizer</SheetTitle>
             <SheetDescription>No output available yet</SheetDescription>
           </SheetHeader>
-          <div className="mt-6 flex flex-1 items-center justify-center text-muted-foreground text-sm">
+          <div className="text-muted-foreground mt-6 flex flex-1 items-center justify-center text-sm">
             Run the workflow to generate a summary
           </div>
         </SheetContent>
@@ -77,18 +77,15 @@ export function TextSummarizerSheet({ open, onOpenChange, workflowId, nodeId }: 
               <FileText className="h-4 w-4" />
               <h3 className="text-sm font-semibold">Summary</h3>
             </div>
-            <div className="rounded-lg border bg-muted/50 p-4">
-              <p className="whitespace-pre-wrap text-sm leading-relaxed">{output.summary}</p>
+            <div className="bg-muted/50 rounded-lg border p-4">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{output.summary}</p>
             </div>
           </div>
 
           {/* Timestamp */}
-          <div className="text-muted-foreground text-xs">
-            Completed: {new Date(output.timestamp).toLocaleString()}
-          </div>
+          <div className="text-muted-foreground text-xs">Completed: {new Date(output.timestamp).toLocaleString()}</div>
         </div>
       </SheetContent>
     </Sheet>
   )
 }
-

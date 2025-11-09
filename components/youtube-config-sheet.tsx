@@ -150,47 +150,47 @@ export function YouTubeConfigSheet({ open, onOpenChange, workflowId, nodeId, ini
           {activeTab === 'output' && hasOutput ? (
             <OutputView output={nodeExecution.output as NodeOutput} />
           ) : (
-        <Form {...form}>
+            <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="url1"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Video URL 1 (Required)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://youtube.com/watch?v=..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="url1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Video URL 1 (Required)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://youtube.com/watch?v=..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="url2"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Video URL 2 (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://youtube.com/watch?v=..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="url2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Video URL 2 (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://youtube.com/watch?v=..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <div className="flex gap-3">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting} className="flex-1">
-                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save
-              </Button>
-            </div>
-          </form>
-        </Form>
+                <div className="flex gap-3">
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={form.formState.isSubmitting} className="flex-1">
+                    {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save
+                  </Button>
+                </div>
+              </form>
+            </Form>
           )}
         </div>
       </SheetContent>
@@ -243,10 +243,8 @@ function OutputView({ output }: { output: NodeOutput }) {
                   </a>
                 </div>
               </div>
-              <div className="max-h-48 overflow-y-auto rounded border bg-muted/30 p-3">
-                <p className="text-muted-foreground whitespace-pre-wrap text-xs leading-relaxed">
-                  {video.transcript}
-                </p>
+              <div className="bg-muted/30 max-h-48 overflow-y-auto rounded border p-3">
+                <p className="text-muted-foreground text-xs leading-relaxed whitespace-pre-wrap">{video.transcript}</p>
               </div>
             </div>
           ))}

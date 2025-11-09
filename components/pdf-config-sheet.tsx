@@ -257,4 +257,3 @@ export function PDFConfigSheet({ open, onOpenChange, workflowId, nodeId, initial
     </Sheet>
   )
 }
-

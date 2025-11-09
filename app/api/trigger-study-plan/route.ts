@@ -1,21 +1,24 @@
-import { textImproverTask } from '@/trigger/text-improver'
+import { studyPlanGeneratorTask } from '@/trigger/study-plan-generator'
 import { tasks } from '@trigger.dev/sdk/v3'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { workflowId, nodeId, text, customPrompt } = body
+    const { workflowId, nodeId, topic, duration, learningStyle, goals, currentLevel } = body
 
-    if (!workflowId || !nodeId || !text) {
+    if (!workflowId || !nodeId || !topic || !duration || !learningStyle || !goals || !currentLevel) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const handle = await tasks.trigger<typeof textImproverTask>('text-improver', {
+    const handle = await tasks.trigger<typeof studyPlanGeneratorTask>('study-plan-generator', {
       workflowId,
       nodeId,
-      text,
-      customPrompt,
+      topic,
+      duration,
+      learningStyle,
+      goals,
+      currentLevel,
     })
 
     return NextResponse.json({
@@ -23,7 +26,7 @@ export async function POST(req: NextRequest) {
       runId: handle.id,
     })
   } catch (error: unknown) {
-    console.error('Error triggering text improver:', error)
+    console.error('Error triggering study plan generator:', error)
     return NextResponse.json(
       {
         error: 'Failed to trigger task',

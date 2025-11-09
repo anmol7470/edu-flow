@@ -40,4 +40,3 @@ export const deleteFiles = mutation({
     return null
   },
 })
-

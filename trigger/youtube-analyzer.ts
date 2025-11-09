@@ -158,4 +158,3 @@ async function updateConvexStatus(
     // Don't throw - we don't want status updates to fail the task
   }
 }
-
