@@ -18,8 +18,8 @@ import type { WorkflowLayoutProps } from '@/lib/types'
 import { useQueryWithStatus } from '@/lib/utils'
 import type { Edge, Node } from '@xyflow/react'
 import { ReactFlowProvider } from '@xyflow/react'
-import { useQuery } from 'convex/react'
-import { Play } from 'lucide-react'
+import { useMutation, useQuery } from 'convex/react'
+import { Play, RotateCcw, Square } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -45,6 +45,14 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   } = useQueryWithStatus(api.workflows.getWorkflow, { workflowId })
 
   const nodeConfigs = useQuery(api.nodeExecutions.getNodeConfigs, { workflowId })
+  const nodeExecutions = useQuery(api.nodeExecutions.getNodeExecutions, { workflowId })
+
+  const stopWorkflow = useMutation(api.workflowEngine.stopWorkflowExecution)
+  const resetWorkflow = useMutation(api.workflowEngine.resetWorkflowExecution)
+
+  // Check if workflow is running
+  const isWorkflowRunning =
+    nodeExecutions && Object.values(nodeExecutions).some((exec: any) => exec.status === 'running')
 
   // Handle error - redirect to home
   if (isError) {
@@ -67,6 +75,19 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   // Parse nodes and edges
   const initialNodes: Node[] = isSuccess && workflow ? JSON.parse(workflow.nodes) : []
   const initialEdges: Edge[] = isSuccess && workflow ? JSON.parse(workflow.edges) : []
+
+  // Check if workflow completed successfully
+  // All non-start nodes must be completed successfully
+  const isWorkflowCompleted =
+    nodeExecutions &&
+    initialNodes.length > 1 &&
+    initialNodes
+      .filter((node) => node.data?.type !== 'start')
+      .every((node) => {
+        const exec = nodeExecutions[node.id]
+        return exec && exec.status === 'completed'
+      }) &&
+    Object.keys(nodeExecutions).length > 1
 
   // Get selected node info
   const selectedNode = selectedNodeId ? initialNodes.find((n) => n.id === selectedNodeId) : null
@@ -146,6 +167,32 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
     }
   }
 
+  // Handle workflow stop
+  const handleStopWorkflow = async () => {
+    try {
+      const loadingToast = toast.loading('Stopping workflow...')
+      const result = await stopWorkflow({ workflowId })
+      toast.dismiss(loadingToast)
+      toast.success(result.message || 'Workflow stopped!')
+    } catch (error) {
+      console.error('Failed to stop workflow:', error)
+      toast.error('Failed to stop workflow')
+    }
+  }
+
+  // Handle workflow reset
+  const handleResetWorkflow = async () => {
+    try {
+      const loadingToast = toast.loading('Resetting workflow...')
+      const result = await resetWorkflow({ workflowId })
+      toast.dismiss(loadingToast)
+      toast.success(result.message || 'Workflow reset successfully!')
+    } catch (error) {
+      console.error('Failed to reset workflow:', error)
+      toast.error('Failed to reset workflow')
+    }
+  }
+
   return (
     <ReactFlowProvider>
       <div className="flex h-screen w-full overflow-hidden">
@@ -157,10 +204,29 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
           {/* Title editor header */}
           <div className="border-border flex items-center justify-between border-b px-6 py-3">
             <WorkflowTitleEditor workflowId={workflowId} />
-            <Button className="gap-2 bg-green-600 text-white hover:bg-green-700" onClick={handleStartWorkflow}>
-              <Play className="h-4 w-4" />
-              Start Workflow
-            </Button>
+            <div className="flex items-center gap-2">
+              {isWorkflowCompleted && !isWorkflowRunning && (
+                <Button
+                  variant="outline"
+                  className="gap-2 border-slate-300 text-slate-700 hover:bg-slate-100"
+                  onClick={handleResetWorkflow}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Reset
+                </Button>
+              )}
+              {isWorkflowRunning ? (
+                <Button className="gap-2 bg-red-600 text-white hover:bg-red-700" onClick={handleStopWorkflow}>
+                  <Square className="h-4 w-4" />
+                  Stop Workflow
+                </Button>
+              ) : (
+                <Button className="gap-2 bg-green-600 text-white hover:bg-green-700" onClick={handleStartWorkflow}>
+                  <Play className="h-4 w-4" />
+                  Start Workflow
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Canvas */}

@@ -207,6 +207,81 @@ export const triggerNodeInternal = internalMutation({
 })
 
 /**
+ * Stop workflow execution
+ * Marks all running nodes as failed/stopped
+ */
+export const stopWorkflowExecution = mutation({
+  args: {
+    workflowId: v.string(),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    message: v.string(),
+    stoppedNodes: v.optional(v.number()),
+  }),
+  handler: async (ctx, args) => {
+    // Get all running node executions
+    const executions = await ctx.db
+      .query('nodeExecutions')
+      .withIndex('by_workflow', (q) => q.eq('workflowId', args.workflowId))
+      .collect()
+
+    let stoppedCount = 0
+
+    // Mark all running nodes as failed with stopped message
+    for (const execution of executions) {
+      if (execution.status === 'running') {
+        await ctx.db.patch(execution._id, {
+          status: 'failed',
+          error: 'Workflow stopped by user',
+          completedAt: Date.now(),
+        })
+        stoppedCount++
+      }
+    }
+
+    return {
+      success: true,
+      message: stoppedCount > 0 ? `Stopped ${stoppedCount} running node(s)` : 'No running nodes to stop',
+      stoppedNodes: stoppedCount,
+    }
+  },
+})
+
+/**
+ * Reset workflow execution
+ * Clears all execution states and outputs while keeping the workflow structure intact
+ */
+export const resetWorkflowExecution = mutation({
+  args: {
+    workflowId: v.string(),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    message: v.string(),
+    clearedNodes: v.optional(v.number()),
+  }),
+  handler: async (ctx, args) => {
+    // Get all node executions for the workflow
+    const executions = await ctx.db
+      .query('nodeExecutions')
+      .withIndex('by_workflow', (q) => q.eq('workflowId', args.workflowId))
+      .collect()
+
+    // Delete all execution records
+    for (const execution of executions) {
+      await ctx.db.delete(execution._id)
+    }
+
+    return {
+      success: true,
+      message: executions.length > 0 ? `Reset workflow - cleared ${executions.length} node execution(s)` : 'Workflow already clean',
+      clearedNodes: executions.length,
+    }
+  },
+})
+
+/**
  * Check and trigger dependent nodes when a node completes
  */
 export const checkAndTriggerDependents = internalMutation({
