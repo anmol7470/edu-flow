@@ -1,36 +1,160 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EduFlow
+
+An AI-powered educational workflow builder that helps students automate educational tasks through visual workflows.
+
+## Description
+
+EduFlow is a modern web application that combines visual workflow building with AI-powered educational tools. Users can create custom workflows by connecting various AI-powered nodes including essay grading, fact checking, text improvement, concept extraction, study plan generation, and more. The platform provides an intuitive drag-and-drop interface for building educational automation pipelines.
+
+## Features
+
+### Available Workflow Nodes
+
+- **Essay Grader** - Grade essays using AI with customizable rubrics (supports PDF documents)
+- **Fact Checker** - Verify claims and check facts in text
+- **Text Improver** - Enhance writing quality, grammar, and style
+- **Text Summarizer** - Generate concise summaries of long content
+- **Concept Extractor** - Extract key concepts and topics from text
+- **Study Plan Generator** - Create personalized study plans
+- **Web Search** - Search the web for information
+- **YouTube Analyzer** - Analyze YouTube video content
+
+### Workflow Features
+
+- Visual drag-and-drop workflow builder
+- Real-time execution status tracking
+- Node configuration with custom parameters
+- Connection validation and error handling
+- Workflow saving and loading
+- Support for complex multi-step workflows
+
+## Tech Stack
+
+### Frontend
+
+- **[Next.js 16](https://nextjs.org/)** - React framework with App Router
+- **[React 19](https://react.dev/)** - UI library
+- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe development
+- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first styling
+- **[shadcn/ui](https://ui.shadcn.com/)** - High-quality UI components
+- **[React Flow](https://reactflow.dev/)** - Visual workflow canvas
+- **[Lucide React](https://lucide.dev/)** - Icon library
+
+### Backend & Services
+
+- **[Convex](https://convex.dev/)** - Real-time backend and database
+- **[Trigger.dev](https://trigger.dev/)** - Background task orchestration
+- **[Better Auth](https://www.better-auth.com/)** - Authentication system
+- **[Supadata](https://supadata.com/)** - Web & Video to text API for makers
+- **[Vercel AI SDK](https://sdk.vercel.ai/)** - AI model integration library
+
+### AI Models
+
+- **[Anthropic Claude Sonnet 4.5](https://www.anthropic.com/claude)** - Primary AI model for text processing
+- **[Google AI](https://ai.google.dev/)** - Additional AI capabilities
+
+### Package Manager
+
+- **[Bun](https://bun.sh/)** - Fast JavaScript runtime and package manager
+
+## Project Structure
+
+```
+edu-flow/
+├── app/                          # Next.js app directory
+│   ├── api/                      # API routes
+│   │   ├── auth/                 # Authentication endpoints
+│   │   ├── start-workflow/       # Workflow execution
+│   │   └── trigger-*/            # Task trigger endpoints
+│   ├── workflow/[id]/            # Workflow editor page
+│   ├── layout.tsx                # Root layout
+│   └── page.tsx                  # Home page
+│
+├── components/                   # React components
+│   ├── ui/                       # shadcn/ui components
+│   ├── workflow-canvas.tsx       # Visual workflow editor
+│   ├── workflow-node.tsx         # Workflow node component
+│   ├── workflow-sidebar.tsx      # Tool palette
+│   └── *-sheet.tsx               # Configuration sheets for each tool
+│
+├── convex/                       # Convex backend
+│   ├── _generated/               # Auto-generated types
+│   ├── auth.config.ts            # Auth configuration
+│   ├── schema.ts                 # Database schema
+│   ├── workflows.ts              # Workflow queries/mutations
+│   ├── workflowEngine.ts         # Workflow execution logic
+│   ├── workflowActions.ts        # Workflow operations
+│   ├── nodeExecutions.ts         # Node execution tracking
+│   └── http.ts                   # HTTP endpoints
+│
+├── trigger/                      # Trigger.dev tasks
+│   ├── essay-grader.ts           # Essay grading task
+│   ├── fact-checker.ts           # Fact checking task
+│   ├── text-improver.ts          # Text improvement task
+│   ├── text-summarizer.ts        # Text summarization task
+│   ├── concept-extractor.ts      # Concept extraction task
+│   ├── study-plan-generator.ts   # Study plan generation task
+│   ├── web-search.ts             # Web search task
+│   └── youtube-analyzer.ts       # YouTube analysis task
+│
+├── lib/                          # Utility libraries
+│   ├── types.ts                  # TypeScript type definitions
+│   ├── nodes.ts                  # Node type definitions
+│   ├── workflow-utils.ts         # Workflow helper functions
+│   ├── workflow-validation.ts    # Workflow validation logic
+│   ├── auth-client.ts            # Auth client utilities
+│   └── utils.ts                  # General utilities
+│
+└── trigger.config.ts             # Trigger.dev configuration
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- **Bun** (latest version)
+- **Node.js** 18+ (for Trigger.dev)
+- **Convex Account** (free tier available)
+- **Trigger.dev Account** (free tier available)
+- **Anthropic API Key** (for Claude AI)
+
+### Installation
+
+1. Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd edu-flow
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+bun install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Copy the `.env.example` file to `.env.local` and fill in the values:
 
-## Learn More
+```bash
+cp .env.example .env.local
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Set up Convex:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Login to Convex
+bun run dev:convex
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+5. Set up Trigger.dev:
 
-## Deploy on Vercel
+```bash
+# Login to Trigger.dev
+bun run dev:trigger
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+6. Start the development server:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+bun run dev
+```

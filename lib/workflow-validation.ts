@@ -200,7 +200,7 @@ export function validateNodeConfigurations(nodes: Node[], nodeConfigs: Record<st
         // Check if rubric is configured (either text or PDF)
         const hasTextRubric = config?.rubricType === 'text' && config?.rubricText?.trim()
         const hasPdfRubric = config?.rubricType === 'pdf' && config?.rubricPdfUrl
-        
+
         if (!hasTextRubric && !hasPdfRubric) {
           missingFields.push('Grading rubric')
         }

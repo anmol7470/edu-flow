@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:convex": "convex dev",
+    "dev:trigger": "bunx trigger.dev@latest dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

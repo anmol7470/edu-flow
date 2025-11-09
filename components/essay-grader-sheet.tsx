@@ -59,7 +59,13 @@ export function EssayGraderSheet({ open, onOpenChange, workflowId, nodeId, initi
     setUploadedPdfUrl(initialConfig?.rubricPdfUrl || '')
     setUploadedPdfName(initialConfig?.rubricPdfName || '')
     setPdfFile(null)
-  }, [nodeId, initialConfig?.rubricType, initialConfig?.rubricText, initialConfig?.rubricPdfUrl, initialConfig?.rubricPdfName])
+  }, [
+    nodeId,
+    initialConfig?.rubricType,
+    initialConfig?.rubricText,
+    initialConfig?.rubricPdfUrl,
+    initialConfig?.rubricPdfName,
+  ])
 
   // Auto-switch to output tab when output becomes available
   useEffect(() => {
@@ -297,11 +303,7 @@ export function EssayGraderSheet({ open, onOpenChange, workflowId, nodeId, initi
                 </Tabs>
 
                 {rubricType === 'text' && (
-                  <Button
-                    onClick={handleSaveConfig}
-                    disabled={!rubricText.trim() || isUploading}
-                    className="w-full"
-                  >
+                  <Button onClick={handleSaveConfig} disabled={!rubricText.trim() || isUploading} className="w-full">
                     Save Rubric
                   </Button>
                 )}
@@ -338,7 +340,8 @@ export function EssayGraderSheet({ open, onOpenChange, workflowId, nodeId, initi
                 <div className="bg-muted/50 rounded-lg border p-3">
                   <div className="text-muted-foreground text-xs">Essay Source</div>
                   <div className="text-lg font-semibold">
-                    {output.essaySource || (output.essayLength ? `${output.essayLength.toLocaleString()} chars` : 'N/A')}
+                    {output.essaySource ||
+                      (output.essayLength ? `${output.essayLength.toLocaleString()} chars` : 'N/A')}
                   </div>
                 </div>
                 <div className="bg-muted/50 rounded-lg border p-3">

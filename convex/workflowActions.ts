@@ -1,9 +1,9 @@
 'use node'
 
+import { tasks } from '@trigger.dev/sdk/v3'
 import { v } from 'convex/values'
 import { api } from './_generated/api'
 import { internalAction } from './_generated/server'
-import { tasks } from '@trigger.dev/sdk/v3'
 
 /**
  * Action to trigger Trigger.dev tasks for workflow nodes
@@ -107,7 +107,7 @@ function getTaskIdForNodeType(nodeType: string): string | null {
  */
 function extractPdfUrlsFromParent(parentOutputs: any[]): string[] {
   const pdfUrls: string[] = []
-  
+
   for (const parent of parentOutputs) {
     if (parent.nodeType === 'pdf' && parent.output?.files) {
       for (const file of parent.output.files) {
@@ -117,7 +117,7 @@ function extractPdfUrlsFromParent(parentOutputs: any[]): string[] {
       }
     }
   }
-  
+
   return pdfUrls
 }
 
@@ -130,14 +130,14 @@ function extractEssayPdfUrl(parentOutputs: any[]): string | undefined {
   if (directPdfUrls.length > 0) {
     return directPdfUrls[0]
   }
-  
+
   // Check if any parent (like essay grader) passed through an essay PDF URL
   for (const parent of parentOutputs) {
     if (parent.output?.essayPdfUrl) {
       return parent.output.essayPdfUrl
     }
   }
-  
+
   return undefined
 }
 
@@ -176,7 +176,7 @@ function prepareTaskPayload(
     case 'text-improver': {
       // Check if there's an original essay PDF URL from parent chain
       const essayPdfUrl = extractEssayPdfUrl(parentOutputs)
-      
+
       // If we have a PDF URL, use that instead of combined text
       // This ensures we improve the original essay, not the grading feedback
       return {
@@ -209,12 +209,10 @@ function prepareTaskPayload(
       // Get essay PDF URL from parent output (if PDF reader was the parent)
       const pdfUrls = extractPdfUrlsFromParent(parentOutputs)
       const essayPdfUrl = pdfUrls[0] || ''
-      
+
       // Get rubric from config (could be text or PDF URL)
-      const rubric = config.rubricType === 'pdf' 
-        ? config.rubricPdfUrl || ''
-        : config.rubricText || ''
-      
+      const rubric = config.rubricType === 'pdf' ? config.rubricPdfUrl || '' : config.rubricText || ''
+
       return {
         ...basePayload,
         essayPdfUrl,
@@ -240,4 +238,3 @@ function prepareTaskPayload(
       }
   }
 }
-

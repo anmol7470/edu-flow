@@ -64,7 +64,14 @@ export function StudyPlanSheet({ open, onOpenChange, workflowId, nodeId, initial
     setLearningStyle(initialConfig?.learningStyle || 'Visual')
     setGoals(initialConfig?.goals || '')
     setCurrentLevel(initialConfig?.currentLevel || 'Beginner')
-  }, [nodeId, initialConfig?.topic, initialConfig?.duration, initialConfig?.learningStyle, initialConfig?.goals, initialConfig?.currentLevel])
+  }, [
+    nodeId,
+    initialConfig?.topic,
+    initialConfig?.duration,
+    initialConfig?.learningStyle,
+    initialConfig?.goals,
+    initialConfig?.currentLevel,
+  ])
 
   // Auto-switch to output tab when output becomes available
   useEffect(() => {
