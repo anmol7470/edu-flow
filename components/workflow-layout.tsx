@@ -1,8 +1,11 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
+import { ConceptExtractorSheet } from '@/components/concept-extractor-sheet'
 import { PDFConfigSheet } from '@/components/pdf-config-sheet'
+import { TextImproverSheet } from '@/components/text-improver-sheet'
 import { TextSummarizerSheet } from '@/components/text-summarizer-sheet'
+import { WebSearchSheet } from '@/components/web-search-sheet'
+import { Button } from '@/components/ui/button'
 import { WorkflowCanvas } from '@/components/workflow-canvas'
 import { WorkflowSidebar } from '@/components/workflow-sidebar'
 import { WorkflowTitleEditor } from '@/components/workflow-title-editor'
@@ -24,6 +27,9 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   const [configSheetOpen, setConfigSheetOpen] = useState(false)
   const [pdfSheetOpen, setPdfSheetOpen] = useState(false)
   const [summarizerSheetOpen, setSummarizerSheetOpen] = useState(false)
+  const [improverSheetOpen, setImproverSheetOpen] = useState(false)
+  const [conceptExtractorSheetOpen, setConceptExtractorSheetOpen] = useState(false)
+  const [webSearchSheetOpen, setWebSearchSheetOpen] = useState(false)
 
   const {
     data: workflow,
@@ -72,6 +78,12 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
         setPdfSheetOpen(true)
       } else if (node?.data?.type === 'summarizer') {
         setSummarizerSheetOpen(true)
+      } else if (node?.data?.type === 'text-improver') {
+        setImproverSheetOpen(true)
+      } else if (node?.data?.type === 'concept-extractor') {
+        setConceptExtractorSheetOpen(true)
+      } else if (node?.data?.type === 'web-search') {
+        setWebSearchSheetOpen(true)
       }
     }
   }
@@ -187,6 +199,32 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
             onOpenChange={setSummarizerSheetOpen}
             workflowId={workflowId}
             nodeId={selectedNodeId}
+          />
+        )}
+        {selectedNodeType === 'text-improver' && selectedNodeId && (
+          <TextImproverSheet
+            open={improverSheetOpen}
+            onOpenChange={setImproverSheetOpen}
+            workflowId={workflowId}
+            nodeId={selectedNodeId}
+            initialConfig={nodeConfigs?.[selectedNodeId]}
+          />
+        )}
+        {selectedNodeType === 'concept-extractor' && selectedNodeId && (
+          <ConceptExtractorSheet
+            open={conceptExtractorSheetOpen}
+            onOpenChange={setConceptExtractorSheetOpen}
+            workflowId={workflowId}
+            nodeId={selectedNodeId}
+          />
+        )}
+        {selectedNodeType === 'web-search' && selectedNodeId && (
+          <WebSearchSheet
+            open={webSearchSheetOpen}
+            onOpenChange={setWebSearchSheetOpen}
+            workflowId={workflowId}
+            nodeId={selectedNodeId}
+            initialConfig={nodeConfigs?.[selectedNodeId]}
           />
         )}
       </div>

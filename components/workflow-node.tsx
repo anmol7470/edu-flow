@@ -41,7 +41,8 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
   const execution = nodeData?.execution
   const hasConfig = nodeData?.config && Object.keys(nodeData.config).length > 0
   const hasOutput = execution?.status === 'completed' && execution?.output
-  const isOutputNode = type === 'summarizer' // Nodes that only show output, not config
+  const isOutputNode = type === 'summarizer' || type === 'concept-extractor' // Nodes that only show output, not config
+  const hasConfigSheet = type === 'youtube' || type === 'pdf' || type === 'text-improver' || type === 'web-search' // Nodes with config sheets
 
   // Status icon mapping
   const statusIcon = {
@@ -121,8 +122,8 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
                 </div>
                 <div className="flex items-center gap-1">
                   {statusIcon}
-                  {/* Config button for nodes with configuration */}
-                  {hasConfig && !isStartNode && !isOutputNode && (
+                  {/* Config button for nodes with configuration sheets */}
+                  {hasConfigSheet && !isStartNode && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
