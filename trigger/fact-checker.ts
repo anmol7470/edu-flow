@@ -1,11 +1,12 @@
 import { anthropic } from '@ai-sdk/anthropic'
 import { google, GoogleGenerativeAIProviderMetadata } from '@ai-sdk/google'
 import { logger, task } from '@trigger.dev/sdk/v3'
-import { generateText, stepCountIs } from 'ai'
+import { convertToModelMessages, generateText, stepCountIs } from 'ai'
 import removeMarkdown from 'remove-markdown'
 
 type FactCheckerPayload = {
   text: string
+  pdfUrls?: string[]
   nodeId: string
   workflowId: string
 }
@@ -26,9 +27,14 @@ export const factCheckerTask = task({
   id: 'fact-checker',
   maxDuration: 900, // 15 minutes
   run: async (payload: FactCheckerPayload, { ctx }) => {
-    const { text, nodeId, workflowId } = payload
+    const { text, pdfUrls, nodeId, workflowId } = payload
 
-    logger.log('Starting fact checker', { nodeId, textLength: text.length })
+    logger.log('Starting fact checker', {
+      nodeId,
+      textLength: text.length,
+      hasPdfUrls: !!pdfUrls?.length,
+      pdfCount: pdfUrls?.length || 0,
+    })
 
     // Stage 1: Analyze text and extract claims to fact-check
     await updateConvexStatus(workflowId, nodeId, {
@@ -38,10 +44,8 @@ export const factCheckerTask = task({
     })
 
     try {
-      // Use Sonnet 4.5 to extract claims
-      const analysisResult = await generateText({
-        model: anthropic('claude-sonnet-4-5'),
-        prompt: `You are a fact-checking assistant. Analyze the following text and identify all factual claims that should be verified.
+      // Prepare content for claim extraction
+      const promptText = `You are a fact-checking assistant. Analyze the following document and identify all factual claims that should be verified.
 
 For each claim, extract:
 1. The topic/subject of the claim
@@ -49,12 +53,40 @@ For each claim, extract:
 
 Format your response as a JSON array of objects with "topic" and "claim" fields.
 
-Text to analyze:
+${text ? `Text to analyze:\n\n${text}\n\n` : ''}Now provide a structured list of claims to fact-check in JSON format:`
 
-${text}
+      // Use Sonnet 4.5 to extract claims
+      // If PDF URLs are provided, pass them as file attachments
+      let analysisResult
+      if (pdfUrls && pdfUrls.length > 0) {
+        const uiMessages = [
+          {
+            id: 'fact-check-analysis',
+            role: 'user' as const,
+            parts: [
+              ...pdfUrls.map((url) => ({
+                type: 'file' as const,
+                url,
+                mediaType: 'application/pdf',
+              })),
+              {
+                type: 'text' as const,
+                text: promptText,
+              },
+            ],
+          },
+        ]
 
-Now provide a structured list of claims to fact-check in JSON format:`,
-      })
+        analysisResult = await generateText({
+          model: anthropic('claude-sonnet-4-5'),
+          messages: convertToModelMessages(uiMessages),
+        })
+      } else {
+        analysisResult = await generateText({
+          model: anthropic('claude-sonnet-4-5'),
+          prompt: promptText,
+        })
+      }
 
       logger.log('Claims extracted', { resultLength: analysisResult.text.length })
 
@@ -68,7 +100,8 @@ Now provide a structured list of claims to fact-check in JSON format:`,
       } catch (parseError) {
         logger.error('Failed to parse claims', { error: String(parseError) })
         // Fallback: treat the whole text as one claim
-        claims = [{ topic: 'General', claim: text.slice(0, 500) }]
+        const fallbackText = text || (pdfUrls && pdfUrls.length > 0 ? 'Document from PDF' : 'No content')
+        claims = [{ topic: 'General', claim: fallbackText.slice(0, 500) }]
       }
 
       logger.log('Parsed claims', { claimCount: claims.length })
@@ -155,7 +188,7 @@ Be thorough and cite your sources.`,
 
       // Prepare output
       const output = {
-        originalText: text,
+        originalText: text || (pdfUrls && pdfUrls.length > 0 ? `[PDF Documents: ${pdfUrls.length}]` : ''),
         claimsChecked: factCheckResults.length,
         results: factCheckResults,
         sources: allSources,

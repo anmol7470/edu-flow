@@ -1,11 +1,12 @@
 import { anthropic } from '@ai-sdk/anthropic'
 import { logger, task } from '@trigger.dev/sdk/v3'
-import { generateText } from 'ai'
+import { convertToModelMessages, generateText } from 'ai'
 import removeMarkdown from 'remove-markdown'
 
 type EssayGraderPayload = {
-  essayText: string
+  essayPdfUrl?: string
   rubric: string
+  rubricType?: 'text' | 'pdf'
   nodeId: string
   workflowId: string
 }
@@ -14,11 +15,12 @@ export const essayGraderTask = task({
   id: 'essay-grader',
   maxDuration: 600, // 10 minutes
   run: async (payload: EssayGraderPayload, { ctx }) => {
-    const { essayText, rubric, nodeId, workflowId } = payload
+    const { essayPdfUrl, rubric, rubricType, nodeId, workflowId } = payload
 
     logger.log('Starting essay grading', {
       nodeId,
-      essayLength: essayText.length,
+      hasEssayPdf: !!essayPdfUrl,
+      rubricType: rubricType || 'text',
       rubricLength: rubric.length,
     })
 
@@ -30,18 +32,13 @@ export const essayGraderTask = task({
     })
 
     try {
-      // Use Sonnet 4.5 to grade the essay
-      const gradingResult = await generateText({
-        model: anthropic('claude-sonnet-4-5'),
-        prompt: `You are an experienced educator and essay grader. Grade the following essay according to the provided rubric.
+      // Prepare the rubric content
+      const isRubricPdf = rubricType === 'pdf' && rubric.startsWith('http')
 
-RUBRIC:
-${rubric}
+      // Build the prompt
+      const promptText = `You are an experienced educator and essay grader. Grade the essay according to the provided rubric.
 
-ESSAY TO GRADE:
-${essayText}
-
-Provide a comprehensive evaluation including:
+${!isRubricPdf ? `RUBRIC:\n${rubric}\n\n` : 'The rubric is provided as a PDF document.\n\n'}Provide a comprehensive evaluation including:
 1. Overall grade/score
 2. Detailed feedback for each rubric criterion
 3. Strengths of the essay
@@ -49,8 +46,56 @@ Provide a comprehensive evaluation including:
 5. Specific suggestions for revision
 6. Final summary and grade justification
 
-Be constructive, specific, and actionable in your feedback. Format your response clearly without using markdown.`,
-      })
+Be constructive, specific, and actionable in your feedback. Format your response clearly without using markdown.`
+
+      // Use Sonnet 4.5 to grade the essay
+      // Handle different combinations of PDF/text for essay and rubric
+      let gradingResult
+      if (essayPdfUrl || isRubricPdf) {
+        const parts = []
+
+        // Add essay PDF if provided
+        if (essayPdfUrl) {
+          parts.push({
+            type: 'file' as const,
+            url: essayPdfUrl,
+            mediaType: 'application/pdf',
+          })
+        }
+
+        // Add rubric PDF if it's a PDF
+        if (isRubricPdf) {
+          parts.push({
+            type: 'file' as const,
+            url: rubric,
+            mediaType: 'application/pdf',
+          })
+        }
+
+        // Add the prompt
+        parts.push({
+          type: 'text' as const,
+          text: promptText,
+        })
+
+        const uiMessages = [
+          {
+            id: 'essay-grader',
+            role: 'user' as const,
+            parts,
+          },
+        ]
+
+        gradingResult = await generateText({
+          model: anthropic('claude-sonnet-4-5'),
+          messages: convertToModelMessages(uiMessages),
+        })
+      } else {
+        gradingResult = await generateText({
+          model: anthropic('claude-sonnet-4-5'),
+          prompt: `${promptText}\n\nNote: No essay document was provided. Please inform the user that an essay is required for grading.`,
+        })
+      }
 
       logger.log('Grading completed', {
         feedbackLength: gradingResult.text.length,
@@ -69,8 +114,9 @@ Be constructive, specific, and actionable in your feedback. Format your response
       const output = {
         overallGrade,
         feedback: cleanFeedback,
-        essayLength: essayText.length,
-        rubricUsed: rubric.slice(0, 200) + (rubric.length > 200 ? '...' : ''),
+        essayLength: essayPdfUrl ? 0 : 0, // PDF length not available
+        essaySource: essayPdfUrl ? 'PDF Document' : 'Not provided',
+        rubricUsed: rubricType === 'pdf' ? 'PDF Rubric' : rubric.slice(0, 200) + (rubric.length > 200 ? '...' : ''),
         timestamp: Date.now(),
       }
 

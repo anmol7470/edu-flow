@@ -49,6 +49,8 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
     type === 'web-search' ||
     type === 'essay-grader' ||
     type === 'study-plan' // Nodes with config sheets
+  // For nodes without config sheets, only show button when they have completed output
+  const shouldShowOutputButton = isOutputNode && hasOutput && !hasConfigSheet
 
   // Status icon mapping
   const statusIcon = {
@@ -141,8 +143,8 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
                       <Settings className="h-3 w-3 text-gray-600" />
                     </button>
                   )}
-                  {/* View output button for output-only nodes */}
-                  {isOutputNode && hasOutput && (
+                  {/* View output button for output-only nodes (only when completed) */}
+                  {shouldShowOutputButton && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation()

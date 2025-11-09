@@ -16,10 +16,18 @@ export const triggerNodeApi = internalAction({
     config: v.any(),
     combinedInput: v.string(),
     apiEndpoint: v.string(),
+    parentOutputs: v.array(
+      v.object({
+        nodeId: v.string(),
+        nodeType: v.string(),
+        nodeLabel: v.string(),
+        output: v.any(),
+      })
+    ),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { workflowId, nodeId, nodeType, config, combinedInput } = args
+    const { workflowId, nodeId, nodeType, config, combinedInput, parentOutputs } = args
 
     try {
       // Handle PDF node specially - it doesn't need a task
@@ -41,7 +49,7 @@ export const triggerNodeApi = internalAction({
       }
 
       // Prepare payload for Trigger.dev task
-      const payload = prepareTaskPayload(nodeType, config, combinedInput, workflowId, nodeId)
+      const payload = prepareTaskPayload(nodeType, config, combinedInput, workflowId, nodeId, parentOutputs)
       const taskId = getTaskIdForNodeType(nodeType)
 
       if (!taskId) {
@@ -95,6 +103,25 @@ function getTaskIdForNodeType(nodeType: string): string | null {
 }
 
 /**
+ * Helper: Extract PDF URLs from parent outputs
+ */
+function extractPdfUrlsFromParent(parentOutputs: any[]): string[] {
+  const pdfUrls: string[] = []
+  
+  for (const parent of parentOutputs) {
+    if (parent.nodeType === 'pdf' && parent.output?.files) {
+      for (const file of parent.output.files) {
+        if (file.url) {
+          pdfUrls.push(file.url)
+        }
+      }
+    }
+  }
+  
+  return pdfUrls
+}
+
+/**
  * Helper: Prepare payload for Trigger.dev tasks
  */
 function prepareTaskPayload(
@@ -102,7 +129,8 @@ function prepareTaskPayload(
   config: any,
   combinedInput: string,
   workflowId: string,
-  nodeId: string
+  nodeId: string,
+  parentOutputs: any[]
 ) {
   const basePayload = { workflowId, nodeId }
 
@@ -138,18 +166,32 @@ function prepareTaskPayload(
         text: combinedInput,
       }
 
-    case 'fact-check':
+    case 'fact-check': {
+      const pdfUrls = extractPdfUrlsFromParent(parentOutputs)
       return {
         ...basePayload,
-        text: combinedInput,
+        text: combinedInput || '',
+        pdfUrls,
       }
+    }
 
-    case 'essay-grader':
+    case 'essay-grader': {
+      // Get essay PDF URL from parent output (if PDF reader was the parent)
+      const pdfUrls = extractPdfUrlsFromParent(parentOutputs)
+      const essayPdfUrl = pdfUrls[0] || ''
+      
+      // Get rubric from config (could be text or PDF URL)
+      const rubric = config.rubricType === 'pdf' 
+        ? config.rubricPdfUrl || ''
+        : config.rubricText || ''
+      
       return {
         ...basePayload,
-        essayText: config.essayText || combinedInput,
-        rubric: config.rubric || '',
+        essayPdfUrl,
+        rubric,
+        rubricType: config.rubricType || 'text',
       }
+    }
 
     case 'study-plan':
       return {

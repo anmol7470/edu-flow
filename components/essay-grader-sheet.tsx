@@ -14,7 +14,8 @@ import toast from 'react-hot-toast'
 type NodeOutput = {
   overallGrade: string
   feedback: string
-  essayLength: number
+  essayLength?: number
+  essaySource?: string
   rubricUsed: string
   timestamp: number
 }
@@ -108,7 +109,18 @@ export function EssayGraderSheet({ open, onOpenChange, workflowId, nodeId, initi
       setPdfFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
 
-      toast.success('PDF uploaded successfully')
+      // Auto-save the configuration after successful upload
+      await saveNodeConfig({
+        workflowId,
+        nodeId,
+        config: JSON.stringify({
+          rubricType: 'pdf',
+          rubricPdfUrl: url,
+          rubricPdfName: pdfFile.name,
+        }),
+      })
+
+      toast.success('PDF uploaded and saved successfully')
     } catch (error) {
       toast.error('Failed to upload PDF')
       console.error(error)
@@ -284,17 +296,15 @@ export function EssayGraderSheet({ open, onOpenChange, workflowId, nodeId, initi
                   </TabsContent>
                 </Tabs>
 
-                <Button
-                  onClick={handleSaveConfig}
-                  disabled={
-                    (rubricType === 'text' && !rubricText.trim()) ||
-                    (rubricType === 'pdf' && !uploadedPdfUrl) ||
-                    isUploading
-                  }
-                  className="w-full"
-                >
-                  Save Rubric
-                </Button>
+                {rubricType === 'text' && (
+                  <Button
+                    onClick={handleSaveConfig}
+                    disabled={!rubricText.trim() || isUploading}
+                    className="w-full"
+                  >
+                    Save Rubric
+                  </Button>
+                )}
               </div>
 
               <div className="rounded-lg border bg-blue-50 p-4 dark:bg-blue-950/50">
@@ -326,8 +336,10 @@ export function EssayGraderSheet({ open, onOpenChange, workflowId, nodeId, initi
               {/* Meta Info */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-muted/50 rounded-lg border p-3">
-                  <div className="text-muted-foreground text-xs">Essay Length</div>
-                  <div className="text-lg font-semibold">{output.essayLength.toLocaleString()} chars</div>
+                  <div className="text-muted-foreground text-xs">Essay Source</div>
+                  <div className="text-lg font-semibold">
+                    {output.essaySource || (output.essayLength ? `${output.essayLength.toLocaleString()} chars` : 'N/A')}
+                  </div>
                 </div>
                 <div className="bg-muted/50 rounded-lg border p-3">
                   <div className="text-muted-foreground text-xs">Rubric Preview</div>

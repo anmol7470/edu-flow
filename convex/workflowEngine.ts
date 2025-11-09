@@ -185,6 +185,7 @@ export const triggerNodeInternal = internalMutation({
         config,
         combinedInput,
         apiEndpoint,
+        parentOutputs,
       })
     } catch (error) {
       const execution = await ctx.db
