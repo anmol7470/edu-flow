@@ -1,4 +1,5 @@
 import { v } from 'convex/values'
+import { internal } from './_generated/api'
 import { mutation, query } from './_generated/server'
 
 /**
@@ -100,6 +101,14 @@ export const updateNodeExecution = mutation({
       await ctx.db.patch(existing._id, data)
     } else {
       await ctx.db.insert('nodeExecutions', data)
+    }
+
+    // If node completed successfully, trigger dependent nodes
+    if (args.status === 'completed') {
+      await ctx.scheduler.runAfter(0, internal.workflowEngine.checkAndTriggerDependents, {
+        workflowId: args.workflowId,
+        completedNodeId: args.nodeId,
+      })
     }
 
     return { success: true }

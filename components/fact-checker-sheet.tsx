@@ -93,9 +93,9 @@ export function FactCheckerSheet({ open, onOpenChange, workflowId, nodeId }: Fac
                 >
                   <div className="mb-2 flex items-start gap-2">
                     {result.isAccurate ? (
-                      <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
+                      <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
                     ) : (
-                      <XCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+                      <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
                     )}
                     <div className="flex-1">
                       <h4 className="text-sm font-semibold">{result.topic}</h4>
@@ -123,7 +123,7 @@ export function FactCheckerSheet({ open, onOpenChange, workflowId, nodeId }: Fac
                     rel="noopener noreferrer"
                     className="bg-muted/30 hover:bg-muted/50 flex items-start gap-3 rounded-lg border p-3 transition-colors"
                   >
-                    <ExternalLink className="mt-0.5 h-4 w-4 flex-shrink-0 text-lime-600" />
+                    <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-lime-600" />
                     <div className="min-w-0 flex-1">
                       {source.title && <p className="text-sm font-medium">{source.title}</p>}
                       <p className="text-muted-foreground truncate text-xs">{source.uri}</p>

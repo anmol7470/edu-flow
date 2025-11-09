@@ -219,7 +219,7 @@ export function PDFConfigSheet({ open, onOpenChange, workflowId, nodeId, initial
               <div className="space-y-2">
                 {uploadedFiles.map((file) => (
                   <div key={file.storageId} className="bg-muted/50 flex items-center gap-3 rounded-lg border p-3">
-                    <FileText className="text-muted-foreground h-8 w-8 flex-shrink-0" />
+                    <FileText className="text-muted-foreground h-8 w-8 shrink-0" />
                     <a
                       href={file.url}
                       target="_blank"
@@ -234,7 +234,7 @@ export function PDFConfigSheet({ open, onOpenChange, workflowId, nodeId, initial
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveFile(file)}
-                      className="hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
+                      className="hover:bg-destructive/10 hover:text-destructive shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

@@ -191,7 +191,7 @@ export function WebSearchSheet({ open, onOpenChange, workflowId, nodeId, initial
                         rel="noopener noreferrer"
                         className="bg-muted/30 hover:bg-muted/50 flex items-start gap-3 rounded-lg border p-3 transition-colors"
                       >
-                        <ExternalLink className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+                        <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
                         <div className="min-w-0 flex-1">
                           {source.title && <p className="text-sm font-medium">{source.title}</p>}
                           <p className="text-muted-foreground truncate text-xs">{source.uri}</p>

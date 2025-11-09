@@ -57,23 +57,13 @@ export function StudyPlanSheet({ open, onOpenChange, workflowId, nodeId, initial
   const hasOutput = nodeExecution?.status === 'completed' && nodeExecution?.output
   const output = hasOutput ? (nodeExecution.output as NodeOutput) : null
 
-  // Load initial config
-  useEffect(() => {
-    if (initialConfig) {
-      if (initialConfig.topic) setTopic(initialConfig.topic)
-      if (initialConfig.duration) setDuration(initialConfig.duration)
-      if (initialConfig.learningStyle) setLearningStyle(initialConfig.learningStyle)
-      if (initialConfig.goals) setGoals(initialConfig.goals)
-      if (initialConfig.currentLevel) setCurrentLevel(initialConfig.currentLevel)
-    }
-  }, [initialConfig])
-
   // Auto-switch to output tab when output becomes available
   useEffect(() => {
     if (open && hasOutput && activeTab === 'config') {
       setActiveTab('output')
     }
-  }, [open, hasOutput, activeTab])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, hasOutput])
 
   const handleSaveConfig = async () => {
     if (!topic.trim() || !goals.trim()) {
@@ -292,7 +282,7 @@ export function StudyPlanSheet({ open, onOpenChange, workflowId, nodeId, initial
                         rel="noopener noreferrer"
                         className="bg-muted/30 hover:bg-muted/50 flex items-start gap-3 rounded-lg border p-3 transition-colors"
                       >
-                        <ExternalLink className="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-600" />
+                        <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
                         <div className="min-w-0 flex-1">
                           {source.title && <p className="text-sm font-medium">{source.title}</p>}
                           <p className="text-muted-foreground truncate text-xs">{source.uri}</p>

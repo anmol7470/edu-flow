@@ -18,7 +18,7 @@ import type { WorkflowLayoutProps } from '@/lib/types'
 import { useQueryWithStatus } from '@/lib/utils'
 import type { Edge, Node } from '@xyflow/react'
 import { ReactFlowProvider } from '@xyflow/react'
-import { useMutation, useQuery } from 'convex/react'
+import { useQuery } from 'convex/react'
 import { Play } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -45,7 +45,6 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   } = useQueryWithStatus(api.workflows.getWorkflow, { workflowId })
 
   const nodeConfigs = useQuery(api.nodeExecutions.getNodeConfigs, { workflowId })
-  const updateNodeExecution = useMutation(api.nodeExecutions.updateNodeExecution)
 
   // Handle error - redirect to home
   if (isError) {
@@ -103,53 +102,44 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   // Handle workflow execution
   const handleStartWorkflow = async () => {
     try {
-      // Find all YouTube nodes with configurations
-      const youtubeNodes = initialNodes.filter((node) => node.data?.type === 'youtube')
+      const loadingToast = toast.loading('Validating workflow...')
 
-      if (youtubeNodes.length === 0) {
-        toast.error('Add at least one YouTube node to execute the workflow')
-        return
-      }
-
-      // Check if all YouTube nodes have configurations
-      const unconfiguredNodes = youtubeNodes.filter((node) => {
-        const config = nodeConfigs?.[node.id]
-        return !config || !config.urls || config.urls.length === 0
+      // Call the workflow execution engine
+      const result = await fetch('/api/start-workflow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workflowId,
+          nodes: JSON.stringify(initialNodes),
+          edges: JSON.stringify(initialEdges),
+          nodeConfigs,
+        }),
       })
 
-      if (unconfiguredNodes.length > 0) {
-        toast.error('Please configure all YouTube nodes before starting')
+      const data = await result.json()
+
+      toast.dismiss(loadingToast)
+
+      if (!result.ok || !data.success) {
+        // Show validation errors
+        if (data.validationErrors) {
+          data.validationErrors.forEach((error: string) => {
+            toast.error(error, { duration: 5000 })
+          })
+        } else if (data.configErrors) {
+          toast.error('Configuration errors found:', { duration: 5000 })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data.configErrors.forEach((error: any) => {
+            toast.error(`${error.label}: ${error.missingFields.join(', ')}`, { duration: 5000 })
+          })
+        } else {
+          toast.error(data.message || 'Failed to start workflow')
+        }
         return
       }
 
-      // Find the start node and mark it as completed
-      const startNode = initialNodes.find((node) => node.data?.type === 'start')
-      if (startNode) {
-        await updateNodeExecution({
-          workflowId,
-          nodeId: startNode.id,
-          status: 'completed',
-        })
-      }
-
-      toast.success('Workflow started! Watch the nodes for progress.')
-
-      // Trigger each YouTube node
-      for (const node of youtubeNodes) {
-        const config = nodeConfigs?.[node.id]
-        if (!config) continue
-
-        // Call trigger.dev task
-        await fetch('/api/trigger-youtube', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            workflowId,
-            nodeId: node.id,
-            urls: config.urls,
-          }),
-        })
-      }
+      // Success!
+      toast.success(data.message || 'Workflow started!')
     } catch (error) {
       console.error('Failed to start workflow:', error)
       toast.error('Failed to start workflow')

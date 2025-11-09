@@ -12,6 +12,8 @@ import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as nodeExecutions from "../nodeExecutions.js";
 import type * as storage from "../storage.js";
+import type * as workflowActions from "../workflowActions.js";
+import type * as workflowEngine from "../workflowEngine.js";
 import type * as workflows from "../workflows.js";
 
 import type {
@@ -33,6 +35,8 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   nodeExecutions: typeof nodeExecutions;
   storage: typeof storage;
+  workflowActions: typeof workflowActions;
+  workflowEngine: typeof workflowEngine;
   workflows: typeof workflows;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
