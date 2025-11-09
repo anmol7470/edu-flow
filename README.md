@@ -33,31 +33,22 @@ EduFlow is a modern web application that combines visual workflow building with 
 
 ### Frontend
 
-- **[Next.js 16](https://nextjs.org/)** - React framework with App Router
-- **[React 19](https://react.dev/)** - UI library
-- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe development
-- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first styling
-- **[shadcn/ui](https://ui.shadcn.com/)** - High-quality UI components
-- **[React Flow](https://reactflow.dev/)** - Visual workflow canvas
-- **[Lucide React](https://lucide.dev/)** - Icon library
+- [Next.js 16](https://nextjs.org/) - React framework with App Router
+- [React 19](https://react.dev/) - UI library
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe development
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first styling
+- [shadcn/ui](https://ui.shadcn.com/) - High-quality UI components
+- [React Flow](https://reactflow.dev/) - Visual workflow canvas
+- [Lucide React](https://lucide.dev/) - Icon library
 
 ### Backend & Services
 
-- **[Convex](https://convex.dev/)** - Real-time backend and database
-- **[Trigger.dev](https://trigger.dev/)** - Background task orchestration
-- **[Better Auth](https://www.better-auth.com/)** - Authentication system
-- **[Supadata](https://supadata.com/)** - Web & Video to text API for makers
-- **[Vercel AI SDK](https://sdk.vercel.ai/)** - AI model integration library
-- **[Nova Act](https://nova.amazon.com/act)** - Headless agentic browser automation tool
-
-### AI Models
-
-- **[Anthropic Claude Sonnet 4.5](https://www.anthropic.com/claude)** - Primary AI model for text processing
-- **[Google AI](https://ai.google.dev/)** - Additional AI capabilities
-
-### Package Manager
-
-- **[Bun](https://bun.sh/)** - Fast JavaScript runtime and package manager
+- [Convex](https://convex.dev/) - Real-time backend and database
+- [Trigger.dev](https://trigger.dev/) - Background task orchestration
+- [Better Auth](https://www.better-auth.com/) - Authentication system
+- [Supadata](https://supadata.com/) - Web & Video to text API for makers
+- [Vercel AI SDK](https://sdk.vercel.ai/) - AI model integration library
+- [Nova Act](https://nova.amazon.com/act) - Headless agentic browser automation tool
 
 ## Project Structure
 
