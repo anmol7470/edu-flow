@@ -2,6 +2,7 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { Supadata } from '@supadata/js'
 import { logger, task } from '@trigger.dev/sdk/v3'
 import { generateText } from 'ai'
+import removeMarkdown from 'remove-markdown'
 
 type YouTubePayload = {
   urls: string[]
@@ -45,16 +46,35 @@ export const youtubeSummarizerTask = task({
         const video = await supadata.youtube.video({ id: url })
         logger.log('Video metadata fetched', { title: video.title })
 
-        // Get transcript
-        const transcriptResult = await supadata.youtube.transcript({
+        // Get transcript as plain text (easier to work with)
+        const transcriptResult = await supadata.transcript({
           url,
-          text: false, // Get timestamped chunks
+          text: true, // Get plain text instead of timestamped chunks
+          mode: 'auto', // Try native, fallback to generate if needed
         })
 
-        // Join transcript chunks into coherent text
-        const fullText = Array.isArray(transcriptResult)
-          ? transcriptResult.map((chunk: { text: string }) => chunk.text).join(' ')
-          : String(transcriptResult)
+        // Extract the content from the response
+        // Handle both direct response and job ID scenarios
+        let fullText: string
+
+        if ('jobId' in transcriptResult) {
+          // For large files, poll for results
+          logger.log('Transcript requires async processing, polling...')
+          const jobResult = await supadata.transcript.getJobStatus(transcriptResult.jobId)
+
+          if (jobResult.status === 'completed') {
+            fullText = (jobResult as unknown as { status: 'completed'; content: string }).content
+          } else if (jobResult.status === 'failed') {
+            const errorData = jobResult.error
+            const errorMsg = errorData ? `${errorData.message} (${errorData.details})` : 'Unknown error'
+            throw new Error(`Transcript generation failed: ${errorMsg}`)
+          } else {
+            throw new Error(`Transcript job is still ${jobResult.status}`)
+          }
+        } else {
+          // Direct response
+          fullText = transcriptResult.content as string
+        }
 
         transcripts.push({
           title: video.title,
@@ -91,16 +111,32 @@ export const youtubeSummarizerTask = task({
       // Summarize using Anthropic
       const summary = await generateText({
         model: anthropic('claude-sonnet-4-5'),
-        prompt: `Summarize the following YouTube video transcripts. Create a comprehensive summary that captures the key points, main ideas, and important details from all videos:\n\n${combinedText}`,
+        prompt: `You are a video content summarizer. I am providing you with YouTube video transcript(s) below. Your task is to read the transcript(s) carefully and create a comprehensive, well-structured summary.
+
+Instructions:
+- DO NOT say you need the transcript - it is provided below
+- Summarize the actual content from the transcript(s)
+- Capture key points, main ideas, and important details
+- If multiple videos are provided, organize the summary accordingly
+- Write in clear, plain text without markdown formatting
+
+Transcripts:
+
+${combinedText}
+
+Now provide a comprehensive summary of the above transcript(s):`,
       })
 
       logger.log('Summary generated successfully', {
         summaryLength: summary.text.length,
       })
 
+      // Remove markdown formatting from the summary
+      const plainTextSummary = removeMarkdown(summary.text)
+
       // Store result in Convex
       const output = {
-        summary: summary.text,
+        summary: plainTextSummary,
         videos: transcripts.map((t) => ({
           title: t.title,
           url: t.url,

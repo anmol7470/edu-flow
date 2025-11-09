@@ -10,7 +10,7 @@ import type { WorkflowLayoutProps } from '@/lib/types'
 import { useQueryWithStatus } from '@/lib/utils'
 import type { Edge, Node } from '@xyflow/react'
 import { ReactFlowProvider } from '@xyflow/react'
-import { useQuery } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 import { Play } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -29,6 +29,7 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   } = useQueryWithStatus(api.workflows.getWorkflow, { workflowId })
 
   const nodeConfigs = useQuery(api.nodeExecutions.getNodeConfigs, { workflowId })
+  const updateNodeExecution = useMutation(api.nodeExecutions.updateNodeExecution)
 
   // Handle error - redirect to home
   if (isError) {
@@ -87,6 +88,16 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
       if (unconfiguredNodes.length > 0) {
         toast.error('Please configure all YouTube nodes before starting')
         return
+      }
+
+      // Find the start node and mark it as completed
+      const startNode = initialNodes.find((node) => node.data?.type === 'start')
+      if (startNode) {
+        await updateNodeExecution({
+          workflowId,
+          nodeId: startNode.id,
+          status: 'completed',
+        })
       }
 
       toast.success('Workflow started! Watch the nodes for progress.')

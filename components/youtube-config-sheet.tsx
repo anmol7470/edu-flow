@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { api } from '@/convex/_generated/api'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from 'convex/react'
-import { Loader2 } from 'lucide-react'
+import { useMutation, useQuery } from 'convex/react'
+import { CheckCircle2, ExternalLink, Loader2, Settings } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { z } from 'zod'
@@ -38,6 +39,16 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
+type NodeOutput = {
+  summary: string
+  videos: Array<{
+    title: string
+    url: string
+  }>
+  videoCount: number
+  timestamp: number
+}
+
 type YouTubeConfigSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -47,7 +58,20 @@ type YouTubeConfigSheetProps = {
 }
 
 export function YouTubeConfigSheet({ open, onOpenChange, workflowId, nodeId, initialConfig }: YouTubeConfigSheetProps) {
+  const [activeTab, setActiveTab] = useState<'config' | 'output'>('config')
   const saveNodeConfig = useMutation(api.nodeExecutions.saveNodeConfig)
+  const nodeExecution = useQuery(api.nodeExecutions.getNodeExecution, { workflowId, nodeId })
+
+  const hasOutput = nodeExecution?.status === 'completed' && nodeExecution?.output
+
+  // Auto-switch to output tab when sheet opens and output is available
+  useEffect(() => {
+    if (open && hasOutput) {
+      setActiveTab('output')
+    } else if (open && !hasOutput) {
+      setActiveTab('config')
+    }
+  }, [open, hasOutput])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -82,54 +106,135 @@ export function YouTubeConfigSheet({ open, onOpenChange, workflowId, nodeId, ini
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="p-4 sm:max-w-md">
+      <SheetContent className="flex flex-col p-4 sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>Configure YouTube Analyzer</SheetTitle>
-          <SheetDescription>Add 1-2 YouTube video URLs to analyze and summarize</SheetDescription>
+          <SheetTitle>YouTube Analyzer</SheetTitle>
+          <SheetDescription>
+            {hasOutput ? 'View analysis results or update configuration' : 'Configure the YouTube analyzer'}
+          </SheetDescription>
         </SheetHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-6">
-            <FormField
-              control={form.control}
-              name="url1"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Video URL 1 (Required)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://youtube.com/watch?v=..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        {/* Tabs */}
+        {hasOutput && (
+          <div className="mt-4 flex gap-2 border-b">
+            <button
+              onClick={() => setActiveTab('output')}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'output'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Results
+            </button>
+            <button
+              onClick={() => setActiveTab('config')}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'config'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Settings className="h-4 w-4" />
+              Configuration
+            </button>
+          </div>
+        )}
 
-            <FormField
-              control={form.control}
-              name="url2"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Video URL 2 (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://youtube.com/watch?v=..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        {/* Content */}
+        <div className="mt-6 flex-1 overflow-y-auto">
+          {activeTab === 'output' && hasOutput ? (
+            <OutputView output={nodeExecution.output as NodeOutput} />
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="url1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Video URL 1 (Required)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://youtube.com/watch?v=..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <div className="flex gap-3">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting} className="flex-1">
-                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save
-              </Button>
-            </div>
-          </form>
-        </Form>
+                <FormField
+                  control={form.control}
+                  name="url2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Video URL 2 (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://youtube.com/watch?v=..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex gap-3">
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={form.formState.isSubmitting} className="flex-1">
+                    {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          )}
+        </div>
       </SheetContent>
     </Sheet>
+  )
+}
+
+function OutputView({ output }: { output: NodeOutput }) {
+  return (
+    <div className="space-y-6">
+      {/* Summary Section */}
+      <div>
+        <h3 className="mb-2 text-sm font-semibold">Summary</h3>
+        <div className="rounded-lg border bg-muted/50 p-4">
+          <p className="whitespace-pre-wrap text-sm leading-relaxed">{output.summary}</p>
+        </div>
+      </div>
+
+      {/* Videos Section */}
+      <div>
+        <h3 className="mb-2 text-sm font-semibold">Videos Analyzed ({output.videoCount})</h3>
+        <div className="space-y-3">
+          {output.videos.map((video, index) => (
+            <div key={index} className="rounded-lg border bg-card p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <h4 className="mb-1 text-sm font-medium">{video.title}</h4>
+                  <a
+                    href={video.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                  >
+                    Watch video
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Timestamp */}
+      <div className="text-xs text-muted-foreground">
+        Completed: {new Date(output.timestamp).toLocaleString()}
+      </div>
+    </div>
   )
 }
