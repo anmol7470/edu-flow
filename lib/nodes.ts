@@ -132,6 +132,4 @@ const allNodeTypes = [
   { id: 'web-search', label: 'Web Search' },
 ]
 
-export const availableNodeTypes = allNodeTypes.filter(
-  (node) => !nodeConfig[node.id]?.disabled
-)
+export const availableNodeTypes = allNodeTypes.filter((node) => !nodeConfig[node.id]?.disabled)

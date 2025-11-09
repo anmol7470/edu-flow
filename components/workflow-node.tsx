@@ -40,6 +40,8 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
   const isStartNode = type === 'start'
   const execution = nodeData?.execution
   const hasConfig = nodeData?.config && Object.keys(nodeData.config).length > 0
+  const hasOutput = execution?.status === 'completed' && execution?.output
+  const isOutputNode = type === 'summarizer' // Nodes that only show output, not config
 
   // Status icon mapping
   const statusIcon = {
@@ -119,7 +121,8 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
                 </div>
                 <div className="flex items-center gap-1">
                   {statusIcon}
-                  {hasConfig && !isStartNode && (
+                  {/* Config button for nodes with configuration */}
+                  {hasConfig && !isStartNode && !isOutputNode && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
@@ -129,6 +132,19 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
                       title="Configure node"
                     >
                       <Settings className="h-3 w-3 text-gray-600" />
+                    </button>
+                  )}
+                  {/* View output button for output-only nodes */}
+                  {isOutputNode && hasOutput && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        nodeData?.onSelect?.()
+                      }}
+                      className="rounded p-1 hover:bg-gray-100"
+                      title="View output"
+                    >
+                      <CheckCircle2 className="h-3 w-3 text-green-600" />
                     </button>
                   )}
                 </div>

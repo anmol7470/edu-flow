@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { TextSummarizerSheet } from '@/components/text-summarizer-sheet'
 import { WorkflowCanvas } from '@/components/workflow-canvas'
 import { WorkflowSidebar } from '@/components/workflow-sidebar'
 import { WorkflowTitleEditor } from '@/components/workflow-title-editor'
@@ -20,6 +21,7 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   const router = useRouter()
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [configSheetOpen, setConfigSheetOpen] = useState(false)
+  const [summarizerSheetOpen, setSummarizerSheetOpen] = useState(false)
 
   const {
     data: workflow,
@@ -64,6 +66,8 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
       const node = initialNodes.find((n) => n.id === nodeId)
       if (node?.data?.type === 'youtube') {
         setConfigSheetOpen(true)
+      } else if (node?.data?.type === 'summarizer') {
+        setSummarizerSheetOpen(true)
       }
     }
   }
@@ -162,6 +166,14 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
             workflowId={workflowId}
             nodeId={selectedNodeId}
             initialConfig={nodeConfigs?.[selectedNodeId]}
+          />
+        )}
+        {selectedNodeType === 'summarizer' && selectedNodeId && (
+          <TextSummarizerSheet
+            open={summarizerSheetOpen}
+            onOpenChange={setSummarizerSheetOpen}
+            workflowId={workflowId}
+            nodeId={selectedNodeId}
           />
         )}
       </div>

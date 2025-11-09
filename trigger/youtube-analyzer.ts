@@ -1,8 +1,5 @@
-import { anthropic } from '@ai-sdk/anthropic'
 import { Supadata } from '@supadata/js'
 import { logger, task } from '@trigger.dev/sdk/v3'
-import { generateText } from 'ai'
-import removeMarkdown from 'remove-markdown'
 
 type YouTubePayload = {
   urls: string[]
@@ -10,13 +7,13 @@ type YouTubePayload = {
   workflowId: string
 }
 
-export const youtubeSummarizerTask = task({
-  id: 'youtube-summarizer',
+export const youtubeAnalyzerTask = task({
+  id: 'youtube-analyzer',
   maxDuration: 600, // 10 minutes
   run: async (payload: YouTubePayload, { ctx }) => {
     const { urls, nodeId, workflowId } = payload
 
-    logger.log('Starting YouTube summarizer', { nodeId, videoCount: urls.length })
+    logger.log('Starting YouTube analyzer', { nodeId, videoCount: urls.length })
 
     // Update status to running
     await updateConvexStatus(workflowId, nodeId, {
@@ -78,12 +75,15 @@ export const youtubeSummarizerTask = task({
 
         transcripts.push({
           title: video.title,
-          text: fullText,
           url,
+          duration: video.duration || 0,
+          transcript: fullText,
+          wordCount: fullText.split(/\s+/).length,
         })
 
         logger.log(`Video ${i + 1} transcript extracted`, {
           textLength: fullText.length,
+          wordCount: fullText.split(/\s+/).length,
         })
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error)
@@ -96,73 +96,26 @@ export const youtubeSummarizerTask = task({
       }
     }
 
-    // Update progress: summarizing
+    // Prepare output with formatted transcripts
+    const output = {
+      videos: transcripts,
+      videoCount: transcripts.length,
+      totalWords: transcripts.reduce((sum, t) => sum + t.wordCount, 0),
+      timestamp: Date.now(),
+    }
+
     await updateConvexStatus(workflowId, nodeId, {
-      status: 'running',
-      progress: 'Generating AI summary...',
+      status: 'completed',
+      output: JSON.stringify(output),
+      progress: undefined,
     })
 
-    logger.log('Generating summary with Anthropic')
+    logger.log('Task completed successfully', {
+      videoCount: transcripts.length,
+      totalWords: output.totalWords,
+    })
 
-    // Combine transcripts with titles
-    const combinedText = transcripts.map((t) => `${t.title}:\n\n${t.text}`).join('\n\n---\n\n')
-
-    try {
-      // Summarize using Anthropic
-      const summary = await generateText({
-        model: anthropic('claude-sonnet-4-5'),
-        prompt: `You are a video content summarizer. I am providing you with YouTube video transcript(s) below. Your task is to read the transcript(s) carefully and create a comprehensive, well-structured summary.
-
-Instructions:
-- DO NOT say you need the transcript - it is provided below
-- Summarize the actual content from the transcript(s)
-- Capture key points, main ideas, and important details
-- If multiple videos are provided, organize the summary accordingly
-- Write in clear, plain text without markdown formatting
-
-Transcripts:
-
-${combinedText}
-
-Now provide a comprehensive summary of the above transcript(s):`,
-      })
-
-      logger.log('Summary generated successfully', {
-        summaryLength: summary.text.length,
-      })
-
-      // Remove markdown formatting from the summary
-      const plainTextSummary = removeMarkdown(summary.text)
-
-      // Store result in Convex
-      const output = {
-        summary: plainTextSummary,
-        videos: transcripts.map((t) => ({
-          title: t.title,
-          url: t.url,
-        })),
-        videoCount: transcripts.length,
-        timestamp: Date.now(),
-      }
-
-      await updateConvexStatus(workflowId, nodeId, {
-        status: 'completed',
-        output: JSON.stringify(output),
-        progress: undefined,
-      })
-
-      logger.log('Task completed successfully')
-
-      return output
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      logger.error('Failed to generate summary', { error: errorMessage })
-      await updateConvexStatus(workflowId, nodeId, {
-        status: 'failed',
-        error: `Failed to generate summary: ${errorMessage}`,
-      })
-      throw error
-    }
+    return output
   },
 })
 
@@ -205,3 +158,4 @@ async function updateConvexStatus(
     // Don't throw - we don't want status updates to fail the task
   }
 }
+

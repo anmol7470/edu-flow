@@ -40,12 +40,15 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>
 
 type NodeOutput = {
-  summary: string
   videos: Array<{
     title: string
     url: string
+    duration: number
+    transcript: string
+    wordCount: number
   }>
   videoCount: number
+  totalWords: number
   timestamp: number
 }
 
@@ -121,7 +124,7 @@ export function YouTubeConfigSheet({ open, onOpenChange, workflowId, nodeId, ini
               onClick={() => setActiveTab('output')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'output'
-                  ? 'border-b-2 border-primary text-primary'
+                  ? 'border-primary text-primary border-b-2'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -132,7 +135,7 @@ export function YouTubeConfigSheet({ open, onOpenChange, workflowId, nodeId, ini
               onClick={() => setActiveTab('config')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'config'
-                  ? 'border-b-2 border-primary text-primary'
+                  ? 'border-primary text-primary border-b-2'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -196,35 +199,54 @@ export function YouTubeConfigSheet({ open, onOpenChange, workflowId, nodeId, ini
 }
 
 function OutputView({ output }: { output: NodeOutput }) {
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
   return (
     <div className="space-y-6">
-      {/* Summary Section */}
-      <div>
-        <h3 className="mb-2 text-sm font-semibold">Summary</h3>
-        <div className="rounded-lg border bg-muted/50 p-4">
-          <p className="whitespace-pre-wrap text-sm leading-relaxed">{output.summary}</p>
+      {/* Stats Section */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-muted/50 rounded-lg border p-3">
+          <div className="text-muted-foreground text-xs">Total Videos</div>
+          <div className="text-2xl font-bold">{output.videoCount}</div>
+        </div>
+        <div className="bg-muted/50 rounded-lg border p-3">
+          <div className="text-muted-foreground text-xs">Total Words</div>
+          <div className="text-2xl font-bold">{output.totalWords.toLocaleString()}</div>
         </div>
       </div>
 
       {/* Videos Section */}
       <div>
-        <h3 className="mb-2 text-sm font-semibold">Videos Analyzed ({output.videoCount})</h3>
-        <div className="space-y-3">
+        <h3 className="mb-3 text-sm font-semibold">Transcripts</h3>
+        <div className="space-y-4">
           {output.videos.map((video, index) => (
-            <div key={index} className="rounded-lg border bg-card p-4">
-              <div className="flex items-start justify-between gap-3">
+            <div key={index} className="bg-card rounded-lg border p-4">
+              <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <h4 className="mb-1 text-sm font-medium">{video.title}</h4>
+                  <div className="text-muted-foreground flex items-center gap-3 text-xs">
+                    <span>{video.wordCount.toLocaleString()} words</span>
+                    {video.duration > 0 && <span>Duration: {formatDuration(video.duration)}</span>}
+                  </div>
                   <a
                     href={video.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                    className="text-muted-foreground hover:text-primary mt-1 inline-flex items-center gap-1 text-xs"
                   >
                     Watch video
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
+              </div>
+              <div className="max-h-48 overflow-y-auto rounded border bg-muted/30 p-3">
+                <p className="text-muted-foreground whitespace-pre-wrap text-xs leading-relaxed">
+                  {video.transcript}
+                </p>
               </div>
             </div>
           ))}
@@ -232,9 +254,7 @@ function OutputView({ output }: { output: NodeOutput }) {
       </div>
 
       {/* Timestamp */}
-      <div className="text-xs text-muted-foreground">
-        Completed: {new Date(output.timestamp).toLocaleString()}
-      </div>
+      <div className="text-muted-foreground text-xs">Completed: {new Date(output.timestamp).toLocaleString()}</div>
     </div>
   )
 }

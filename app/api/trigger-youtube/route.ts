@@ -1,4 +1,4 @@
-import { youtubeSummarizerTask } from '@/trigger/youtube-summarizer'
+import { youtubeAnalyzerTask } from '@/trigger/youtube-analyzer'
 import { tasks } from '@trigger.dev/sdk/v3'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -11,8 +11,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     }
 
-    // Trigger the YouTube summarizer task
-    const handle = await tasks.trigger<typeof youtubeSummarizerTask>('youtube-summarizer', {
+    // Trigger the YouTube analyzer task
+    const handle = await tasks.trigger<typeof youtubeAnalyzerTask>('youtube-analyzer', {
       workflowId,
       nodeId,
       urls,
