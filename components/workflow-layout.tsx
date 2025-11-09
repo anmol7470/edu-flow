@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { PDFConfigSheet } from '@/components/pdf-config-sheet'
 import { TextSummarizerSheet } from '@/components/text-summarizer-sheet'
 import { WorkflowCanvas } from '@/components/workflow-canvas'
 import { WorkflowSidebar } from '@/components/workflow-sidebar'
@@ -21,6 +22,7 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   const router = useRouter()
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [configSheetOpen, setConfigSheetOpen] = useState(false)
+  const [pdfSheetOpen, setPdfSheetOpen] = useState(false)
   const [summarizerSheetOpen, setSummarizerSheetOpen] = useState(false)
 
   const {
@@ -66,6 +68,8 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
       const node = initialNodes.find((n) => n.id === nodeId)
       if (node?.data?.type === 'youtube') {
         setConfigSheetOpen(true)
+      } else if (node?.data?.type === 'pdf') {
+        setPdfSheetOpen(true)
       } else if (node?.data?.type === 'summarizer') {
         setSummarizerSheetOpen(true)
       }
@@ -163,6 +167,15 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
           <YouTubeConfigSheet
             open={configSheetOpen}
             onOpenChange={setConfigSheetOpen}
+            workflowId={workflowId}
+            nodeId={selectedNodeId}
+            initialConfig={nodeConfigs?.[selectedNodeId]}
+          />
+        )}
+        {selectedNodeType === 'pdf' && selectedNodeId && (
+          <PDFConfigSheet
+            open={pdfSheetOpen}
+            onOpenChange={setPdfSheetOpen}
             workflowId={workflowId}
             nodeId={selectedNodeId}
             initialConfig={nodeConfigs?.[selectedNodeId]}

@@ -20,7 +20,7 @@ type NodeData = {
   type?: string
   onDelete?: (id: string) => void
   onReplace?: (id: string, newType: string) => void
-  config?: { urls?: string[] }
+  config?: Record<string, any> // Flexible config for different node types
   execution?: {
     status?: 'idle' | 'running' | 'completed' | 'failed'
     progress?: string
@@ -157,6 +157,7 @@ export const WorkflowNode = memo(({ id, data, selected }: NodeProps) => {
               {hasConfig && (
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   {type === 'youtube' && nodeData.config?.urls && <span>{nodeData.config.urls.length} video(s)</span>}
+                  {type === 'pdf' && nodeData.config?.files && <span>{nodeData.config.files.length} PDF(s)</span>}
                 </div>
               )}
 
