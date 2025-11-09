@@ -17,22 +17,33 @@ import {
   type NodeTypes,
   type OnConnect,
 } from '@xyflow/react'
-import { useMutation } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 import debounce from 'lodash.debounce'
 import { nanoid } from 'nanoid'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 function FlowCanvas({
   workflowId,
   userId,
   initialNodes: providedInitialNodes,
   initialEdges: providedInitialEdges,
-}: WorkflowCanvasProps) {
+  selectedNodeId: externalSelectedNodeId,
+  onSelectedNodeChange,
+}: WorkflowCanvasProps & {
+  selectedNodeId?: string | null
+  onSelectedNodeChange?: (nodeId: string | null) => void
+}) {
   const [nodes, setNodes, onNodesChange] = useNodesState(providedInitialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(providedInitialEdges)
+  const [internalSelectedNodeId, setInternalSelectedNodeId] = useState<string | null>(null)
+  const selectedNodeId = externalSelectedNodeId ?? internalSelectedNodeId
   const { screenToFlowPosition } = useReactFlow()
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const saveWorkflow = useMutation(api.workflows.saveWorkflow)
+
+  // Subscribe to node configs and executions
+  const nodeConfigs = useQuery(api.nodeExecutions.getNodeConfigs, { workflowId })
+  const nodeExecutions = useQuery(api.nodeExecutions.getNodeExecutions, { workflowId })
 
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
@@ -95,7 +106,7 @@ function FlowCanvas({
     [workflowId, userId, saveWorkflow]
   )
 
-  // Add delete and replace handlers to all nodes
+  // Add delete and replace handlers, config, and execution state to all nodes
   useEffect(() => {
     setNodes((nds) =>
       nds.map((node) => ({
@@ -105,10 +116,20 @@ function FlowCanvas({
           ...node.data,
           onDelete: handleDeleteNode,
           onReplace: handleReplaceNode,
+          config: nodeConfigs?.[node.id],
+          execution: nodeExecutions?.[node.id],
+          isSelected: selectedNodeId === node.id,
+          onSelect: () => {
+            if (onSelectedNodeChange) {
+              onSelectedNodeChange(node.id)
+            } else {
+              setInternalSelectedNodeId(node.id)
+            }
+          },
         },
       }))
     )
-  }, [handleDeleteNode, handleReplaceNode, setNodes])
+  }, [handleDeleteNode, handleReplaceNode, nodeConfigs, nodeExecutions, selectedNodeId, setNodes])
 
   // Save workflow whenever nodes or edges change
   useEffect(() => {
@@ -118,6 +139,17 @@ function FlowCanvas({
   }, [nodes, edges, debouncedSave])
 
   const onConnect: OnConnect = useCallback((connection) => setEdges((eds) => addEdge(connection, eds)), [setEdges])
+
+  const onNodeClick = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      if (onSelectedNodeChange) {
+        onSelectedNodeChange(node.id)
+      } else {
+        setInternalSelectedNodeId(node.id)
+      }
+    },
+    [onSelectedNodeChange]
+  )
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault()
@@ -167,6 +199,7 @@ function FlowCanvas({
         onConnect={onConnect}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{
@@ -183,6 +216,11 @@ function FlowCanvas({
   )
 }
 
-export function WorkflowCanvas(props: WorkflowCanvasProps) {
+export function WorkflowCanvas(
+  props: WorkflowCanvasProps & {
+    selectedNodeId?: string | null
+    onSelectedNodeChange?: (nodeId: string | null) => void
+  }
+) {
   return <FlowCanvas {...props} />
 }

@@ -4,16 +4,22 @@ import { Button } from '@/components/ui/button'
 import { WorkflowCanvas } from '@/components/workflow-canvas'
 import { WorkflowSidebar } from '@/components/workflow-sidebar'
 import { WorkflowTitleEditor } from '@/components/workflow-title-editor'
+import { YouTubeConfigSheet } from '@/components/youtube-config-sheet'
 import { api } from '@/convex/_generated/api'
 import type { WorkflowLayoutProps } from '@/lib/types'
 import { useQueryWithStatus } from '@/lib/utils'
 import type { Edge, Node } from '@xyflow/react'
 import { ReactFlowProvider } from '@xyflow/react'
+import { useQuery } from 'convex/react'
 import { Play } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   const router = useRouter()
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const [configSheetOpen, setConfigSheetOpen] = useState(false)
 
   const {
     data: workflow,
@@ -21,6 +27,8 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
     isPending,
     isError,
   } = useQueryWithStatus(api.workflows.getWorkflow, { workflowId })
+
+  const nodeConfigs = useQuery(api.nodeExecutions.getNodeConfigs, { workflowId })
 
   // Handle error - redirect to home
   if (isError) {
@@ -44,6 +52,66 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
   const initialNodes: Node[] = isSuccess && workflow ? JSON.parse(workflow.nodes) : []
   const initialEdges: Edge[] = isSuccess && workflow ? JSON.parse(workflow.edges) : []
 
+  // Get selected node info
+  const selectedNode = selectedNodeId ? initialNodes.find((n) => n.id === selectedNodeId) : null
+  const selectedNodeType = selectedNode?.data?.type as string | undefined
+
+  // Handle node selection
+  const handleNodeSelect = (nodeId: string | null) => {
+    setSelectedNodeId(nodeId)
+    if (nodeId) {
+      const node = initialNodes.find((n) => n.id === nodeId)
+      if (node?.data?.type === 'youtube') {
+        setConfigSheetOpen(true)
+      }
+    }
+  }
+
+  // Handle workflow execution
+  const handleStartWorkflow = async () => {
+    try {
+      // Find all YouTube nodes with configurations
+      const youtubeNodes = initialNodes.filter((node) => node.data?.type === 'youtube')
+
+      if (youtubeNodes.length === 0) {
+        toast.error('Add at least one YouTube node to execute the workflow')
+        return
+      }
+
+      // Check if all YouTube nodes have configurations
+      const unconfiguredNodes = youtubeNodes.filter((node) => {
+        const config = nodeConfigs?.[node.id]
+        return !config || !config.urls || config.urls.length === 0
+      })
+
+      if (unconfiguredNodes.length > 0) {
+        toast.error('Please configure all YouTube nodes before starting')
+        return
+      }
+
+      toast.success('Workflow started! Watch the nodes for progress.')
+
+      // Trigger each YouTube node
+      for (const node of youtubeNodes) {
+        const config = nodeConfigs[node.id]
+
+        // Call trigger.dev task
+        await fetch('/api/trigger-youtube', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workflowId,
+            nodeId: node.id,
+            urls: config.urls,
+          }),
+        })
+      }
+    } catch (error) {
+      console.error('Failed to start workflow:', error)
+      toast.error('Failed to start workflow')
+    }
+  }
+
   return (
     <ReactFlowProvider>
       <div className="flex h-screen w-full overflow-hidden">
@@ -55,15 +123,9 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
           {/* Title editor header */}
           <div className="border-border flex items-center justify-between border-b px-6 py-3">
             <WorkflowTitleEditor workflowId={workflowId} />
-            <Button
-              className="gap-2 bg-green-600 text-white hover:bg-green-700"
-              onClick={() => {
-                // TODO: Implement workflow execution
-                console.log('Start workflow')
-              }}
-            >
+            <Button className="gap-2 bg-green-600 text-white hover:bg-green-700" onClick={handleStartWorkflow}>
               <Play className="h-4 w-4" />
-              Start
+              Start Workflow
             </Button>
           </div>
 
@@ -74,9 +136,22 @@ export function WorkflowLayout({ workflowId, userId }: WorkflowLayoutProps) {
               userId={userId}
               initialNodes={initialNodes}
               initialEdges={initialEdges}
+              selectedNodeId={selectedNodeId}
+              onSelectedNodeChange={handleNodeSelect}
             />
           </div>
         </div>
+
+        {/* Configuration sheets */}
+        {selectedNodeType === 'youtube' && selectedNodeId && (
+          <YouTubeConfigSheet
+            open={configSheetOpen}
+            onOpenChange={setConfigSheetOpen}
+            workflowId={workflowId}
+            nodeId={selectedNodeId}
+            initialConfig={nodeConfigs?.[selectedNodeId]}
+          />
+        )}
       </div>
     </ReactFlowProvider>
   )
